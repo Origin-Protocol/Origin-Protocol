@@ -138,6 +138,8 @@ def _cmd_sign(args: argparse.Namespace) -> int:
         intended_platforms=args.intended_platforms,
         key_id=key_id,
     )
+    if args.show_origin_id:
+        _log(args, f"Origin ID: {manifest.origin_id or 'missing'}")
     bundle = create_bundle(manifest, private_key, Path(args.public_key), output_dir)
     _log(args, f"Bundle created at: {bundle.directory}")
     return 0
@@ -150,6 +152,8 @@ def _cmd_verify(args: argparse.Namespace) -> int:
         _log(args, "Signature verified")
         _log(args, f"Creator: {manifest.creator_id}")
         _log(args, f"Asset: {manifest.asset_id}")
+        if args.show_origin_id:
+            _log(args, f"Origin ID: {manifest.origin_id or 'missing'}")
         _log(args, f"Hash: {manifest.content_hash}")
         return 0
     _log(args, "Signature verification failed")
@@ -173,6 +177,8 @@ def _cmd_seal(args: argparse.Namespace) -> int:
         intended_platforms=args.intended_platforms,
         key_id=key_id,
     )
+    if args.show_origin_id:
+        _log(args, f"Origin ID: {manifest.origin_id or 'missing'}")
     bundle_path = create_sealed_bundle(
         file_path=file_path,
         manifest=manifest,
@@ -191,6 +197,8 @@ def _cmd_verify_seal(args: argparse.Namespace) -> int:
         _log(args, "Seal verified")
         _log(args, f"Creator: {manifest.creator_id}")
         _log(args, f"Asset: {manifest.asset_id}")
+        if args.show_origin_id:
+            _log(args, f"Origin ID: {manifest.origin_id or 'missing'}")
         _log(args, f"Hash: {manifest.content_hash}")
         return 0
     _log(args, "Seal verification failed")
@@ -682,6 +690,8 @@ def _cmd_explain(args: argparse.Namespace) -> int:
         _log(args, f"Creator: {manifest.creator_id}")
         _log(args, f"Asset: {manifest.asset_id}")
         _log(args, f"Key id: {manifest.key_id}")
+        if args.show_origin_id:
+            _log(args, f"Origin ID: {manifest.origin_id or 'missing'}")
         _log(args, f"Content hash: {manifest.content_hash}")
         _log(args, f"Platforms: {', '.join(manifest.intended_platforms)}")
         return 0
@@ -709,6 +719,7 @@ def build_parser() -> argparse.ArgumentParser:
     sign.add_argument("--private-key", required=True, help="Path to private key PEM")
     sign.add_argument("--public-key", required=True, help="Path to public key PEM")
     sign.add_argument("--key-id", help="Optional key identifier")
+    sign.add_argument("--show-origin-id", action="store_true", help="Print the derived ORIGIN ID")
     sign.add_argument("--output-dir", default="origin.bundle", help="Output directory")
     sign.add_argument("--force", action="store_true", help="Overwrite existing output")
     sign.add_argument("--quiet", action="store_true")
@@ -717,6 +728,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = sub.add_parser("verify", help="Verify a signed bundle")
     verify.add_argument("bundle_dir", help="Path to bundle directory")
+    verify.add_argument("--show-origin-id", action="store_true", help="Print ORIGIN ID if available")
     verify.add_argument("--quiet", action="store_true")
     verify.add_argument("--verbose", action="store_true")
     verify.set_defaults(func=_cmd_verify)
@@ -729,6 +741,7 @@ def build_parser() -> argparse.ArgumentParser:
     seal.add_argument("--private-key", required=True, help="Path to private key PEM")
     seal.add_argument("--public-key", required=True, help="Path to public key PEM")
     seal.add_argument("--key-id", help="Optional key identifier")
+    seal.add_argument("--show-origin-id", action="store_true", help="Print the derived ORIGIN ID")
     seal.add_argument("--output", default="origin.bundle.zip", help="Output zip path")
     seal.add_argument("--force", action="store_true", help="Overwrite existing output")
     seal.add_argument("--quiet", action="store_true")
@@ -737,6 +750,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify_seal = sub.add_parser("verify-seal", help="Verify a sealed media bundle")
     verify_seal.add_argument("bundle_path", help="Path to sealed bundle zip")
+    verify_seal.add_argument("--show-origin-id", action="store_true", help="Print ORIGIN ID if available")
     verify_seal.add_argument("--quiet", action="store_true")
     verify_seal.add_argument("--verbose", action="store_true")
     verify_seal.set_defaults(func=_cmd_verify_seal)
@@ -990,6 +1004,7 @@ def build_parser() -> argparse.ArgumentParser:
     explain_group.add_argument("--bundle", help="Path to bundle directory or zip")
     explain_group.add_argument("--attestation", help="Path to attestation JSON")
     explain.add_argument("--sealed", action="store_true", help="Treat bundle as sealed zip")
+    explain.add_argument("--show-origin-id", action="store_true", help="Print ORIGIN ID if available")
     explain.add_argument("--quiet", action="store_true")
     explain.add_argument("--verbose", action="store_true")
     explain.set_defaults(func=_cmd_explain)

@@ -17,9 +17,15 @@ This is the **first building block** for a universal, creator-side protection la
 
 ## Quick start
 1) Create a virtual environment and install deps.
+	- `python -m venv .venv`
+	- `source .venv/bin/activate` (macOS/Linux) or `.venv\Scripts\activate` (Windows)
+	- `pip install -r requirements.txt`
 2) Generate keys.
+	- `origin init-keys --output-dir ./keys`
 3) Sign a file to produce a bundle.
+	- `origin sign ./media.mp4 --creator-id creator-123 --asset-id asset-123 --public-key ./keys/public_key.ed25519 --private-key ./keys/private_key.ed25519 --output-dir ./origin.bundle`
 4) Verify the bundle.
+	- `origin verify ./origin.bundle`
 
 ## CLI overview
 - `origin init-keys` → generate Ed25519 keypair
@@ -92,6 +98,7 @@ See [docs/ORIGIN_Platform_SDK.md](docs/ORIGIN_Platform_SDK.md).
 
 ## Error metadata
 Rejections include category, subcategory, severity, is_fatal, actions, remediation, and localization/docs links.
+See [docs/ORIGIN_Error_Codes_v1.md](docs/ORIGIN_Error_Codes_v1.md) for the frozen v1 list.
 
 ## Versioning
 This project follows semantic versioning (MAJOR.MINOR.PATCH). See [CHANGELOG.md](CHANGELOG.md).
@@ -108,6 +115,17 @@ The manifest includes:
 - `intended_platforms`
 - `key_id` (public key fingerprint, optional)
 - `origin_version`
+
+## Why ORIGIN ID exists
+ORIGIN ID is the canonical, stable identifier for an asset in the Origin ecosystem.
+It is deterministic, portable, and independent of platform, filename, or internal product tooling.
+
+Definition:
+- `origin_id = UUIDv5("origin-protocol:origin-id", "<key_id>:<content_hash>")`
+
+## What’s public vs private
+Public (standard): protocol specs, schemas, verification logic, trust anchors, governance CIDs, SDKs, and documentation.
+Private (product): creator tooling, licensing/billing logic, internal roadmaps, and experimental R&D.
 
 ## Key registry format
 A registry is a JSON file containing key records:
