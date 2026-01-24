@@ -10,7 +10,6 @@ Please share:
 - Governance bootstrap URL/CID
 - Policy profile recommendations
 - Test fixtures and sample requests
-- Billing setup for usage-based pricing
 
 Our platform details:
 - Platform ID:

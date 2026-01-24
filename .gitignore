@@ -2,3 +2,9 @@
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+# Private business docs (keep local, remove from GitHub)
+Python/platform_memo.md
+Python/docs/ORIGIN_License.md
+Python/docs/ORIGIN_PayPal_IPN.md
+Python/docs/Platform_Pricing.md

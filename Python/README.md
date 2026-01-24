@@ -50,11 +50,6 @@ Localization and exit codes:
 - `origin attest-issue` → issue a creator attestation
 - `origin attest-verify` → verify a creator attestation
 - `origin trust-store-init` → create a trust store
-- `origin license-issue` → issue a signed membership license
-- `origin license-verify` → verify a membership license
-- `origin license-ledger-init` → create a signed license revocation ledger
-- `origin license-ledger-add` → add entry to a license ledger
-- `origin license-ledger-verify` → verify a license ledger
 
 ## Bundle format
 A bundle is a folder containing:
@@ -82,9 +77,6 @@ See the draft spec in [docs/ORIGIN_Attestation.md](docs/ORIGIN_Attestation.md).
 ## Trust & governance
 See [docs/ORIGIN_Trust_Governance.md](docs/ORIGIN_Trust_Governance.md).
 
-## Membership licenses
-See [docs/ORIGIN_License.md](docs/ORIGIN_License.md).
-
 ## Node network registry
 See [docs/ORIGIN_Node_Network.md](docs/ORIGIN_Node_Network.md).
 
@@ -97,9 +89,6 @@ See the draft spec in [docs/ORIGIN_Canonicalization.md](docs/ORIGIN_Canonicaliza
 
 ## Platform SDK (Python)
 See [docs/ORIGIN_Platform_SDK.md](docs/ORIGIN_Platform_SDK.md).
-
-## Billing automation (PayPal IPN)
-See [docs/ORIGIN_PayPal_IPN.md](docs/ORIGIN_PayPal_IPN.md) for automated license issuance and revocation using PayPal IPN.
 
 ## Error metadata
 Rejections include category, subcategory, severity, is_fatal, actions, remediation, and localization/docs links.
@@ -136,9 +125,3 @@ A revocation list is a JSON file containing entries:
 - `asset_id` or `content_hash` or `key_id`
 - `reason` (optional)
 
-## Next steps
-- Embed bundle data directly into video containers
-- Add platform attestation endpoints
-- Add platform verification SDKs
-- Publish license ledger hosting guidance
-- Publish node registry reference implementation
