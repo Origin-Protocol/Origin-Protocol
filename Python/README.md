@@ -111,6 +111,9 @@ See the draft spec in [docs/ORIGIN_Canonicalization.md](docs/ORIGIN_Canonicaliza
 ## Platform SDK (Python)
 See [docs/ORIGIN_Platform_SDK.md](docs/ORIGIN_Platform_SDK.md).
 
+## Reference integrations
+See [docs/ORIGIN_Integration_Cookbook.md](docs/ORIGIN_Integration_Cookbook.md) for Python/JS/Go snippets and a cURL cookbook.
+
 ## Platform integration in 30 seconds
 POST /v1/ledger/verify
 ```
