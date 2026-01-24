@@ -1,6 +1,12 @@
 # Origin Protocol (Python)
 
+A creator‑controlled authenticity layer for pre‑upload ownership proofs, independent of platforms and file formats.
+
 Creator-controlled metadata + signatures for pre-upload ownership proofs.
+
+## Install
+- `pip install origin-protocol`
+- or `pip install -r requirements.txt`
 
 Current version: 0.2.0
 
@@ -26,6 +32,9 @@ This is the **first building block** for a universal, creator-side protection la
 	- `origin sign ./media.mp4 --creator-id creator-123 --asset-id asset-123 --public-key ./keys/public_key.ed25519 --private-key ./keys/private_key.ed25519 --output-dir ./origin.bundle`
 4) Verify the bundle.
 	- `origin verify ./origin.bundle`
+
+## Verification pipeline overview
+media → hash → manifest → sign → bundle → seal → verify
 
 ## CLI overview
 - `origin init-keys` → generate Ed25519 keypair
@@ -56,6 +65,12 @@ Localization and exit codes:
 - `origin attest-issue` → issue a creator attestation
 - `origin attest-verify` → verify a creator attestation
 - `origin trust-store-init` → create a trust store
+
+Example CLI output (with ORIGIN ID):
+- Creator: creator-123
+- Asset: asset-123
+- Origin ID: 746fba9f-4c5c-5fcf-8621-0765dd99f750
+- Hash: c6f7611b0406f2a66b33f5bb05c8acfa2bd3dc7cd7aef12d0f2d087c6efc8a56
 
 ## Bundle format
 A bundle is a folder containing:
@@ -96,12 +111,31 @@ See the draft spec in [docs/ORIGIN_Canonicalization.md](docs/ORIGIN_Canonicaliza
 ## Platform SDK (Python)
 See [docs/ORIGIN_Platform_SDK.md](docs/ORIGIN_Platform_SDK.md).
 
+## Platform integration in 30 seconds
+POST /v1/ledger/verify
+```
+{
+	"creator_id": "...",
+	"key_id": "...",
+	"asset_id": "...",
+	"origin_id": "...",
+	"content_hash": "...",
+	"platform_id": "yt"
+}
+```
+
 ## Error metadata
 Rejections include category, subcategory, severity, is_fatal, actions, remediation, and localization/docs links.
 See [docs/ORIGIN_Error_Codes_v1.md](docs/ORIGIN_Error_Codes_v1.md) for the frozen v1 list.
 
 ## Versioning
 This project follows semantic versioning (MAJOR.MINOR.PATCH). See [CHANGELOG.md](CHANGELOG.md).
+
+## Stability guarantees
+- Frozen API contract (v1)
+- Frozen OpenAPI schema (v1)
+- Frozen error codes (v1)
+- Deterministic ORIGIN ID derivation
 
 ## Fixtures
 Illustrative examples are in [docs/fixtures/README.md](docs/fixtures/README.md).
@@ -126,6 +160,13 @@ Definition:
 ## What’s public vs private
 Public (standard): protocol specs, schemas, verification logic, trust anchors, governance CIDs, SDKs, and documentation.
 Private (product): creator tooling, licensing/billing logic, internal roadmaps, and experimental R&D.
+
+## Security model summary
+- Ed25519 signatures for authenticity
+- SHA‑256 hashing for integrity
+- Deterministic manifests and ORIGIN ID for reproducibility
+- Tamper detection via hash and signature verification
+- Revocation semantics for key and asset trust
 
 ## Key registry format
 A registry is a JSON file containing key records:
