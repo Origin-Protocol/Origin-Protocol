@@ -1,0 +1,10 @@
+{
+  "version": "2026-01-24",
+  "stable_url": "https://originprotocol.dev/bootstrap/platform.json",
+  "ledger_cid": "",
+  "node_endpoints": [],
+  "ipfs_gateways": [],
+  "governance_ledger_cid": "",
+  "governance_node_endpoints": [],
+  "governance_ipfs_gateways": []
+}

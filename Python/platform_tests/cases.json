@@ -1,0 +1,50 @@
+[
+  {
+    "id": "valid_asset",
+    "request": {
+      "creator_id": "creator-1",
+      "key_id": "key-1",
+      "asset_id": "asset-valid",
+      "content_hash": "hash-valid",
+      "platform_id": "tiktok"
+    },
+    "expected_ok": true,
+    "expected_reasons": []
+  },
+  {
+    "id": "platform_mismatch",
+    "request": {
+      "creator_id": "creator-1",
+      "key_id": "key-1",
+      "asset_id": "asset-valid",
+      "content_hash": "hash-valid",
+      "platform_id": "instagram"
+    },
+    "expected_ok": false,
+    "expected_reasons": ["platform_mismatch"]
+  },
+  {
+    "id": "revoked_asset",
+    "request": {
+      "creator_id": "creator-1",
+      "key_id": "key-1",
+      "asset_id": "asset-revoked",
+      "content_hash": "hash-revoked",
+      "platform_id": "tiktok"
+    },
+    "expected_ok": false,
+    "expected_reasons": ["revoked"]
+  },
+  {
+    "id": "key_revoked",
+    "request": {
+      "creator_id": "creator-2",
+      "key_id": "key-2",
+      "asset_id": "asset-key-revoked",
+      "content_hash": "hash-key-revoked",
+      "platform_id": "instagram"
+    },
+    "expected_ok": false,
+    "expected_reasons": ["key_untrusted"]
+  }
+]

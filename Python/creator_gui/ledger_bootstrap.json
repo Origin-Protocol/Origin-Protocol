@@ -1,0 +1,20 @@
+{
+  "ledger_cid": "",
+  "node_endpoints": [
+    "http://127.0.0.1:9020/ledger/{cid}",
+    "http://127.0.0.1:9021/ledger/{cid}"
+  ],
+  "ipfs_gateways": [
+    "https://ipfs.io/ipfs/{cid}",
+    "https://cloudflare-ipfs.com/ipfs/{cid}"
+  ],
+  "governance_ledger_cid": "",
+  "governance_node_endpoints": [
+    "http://127.0.0.1:9020/ledger/{cid}",
+    "http://127.0.0.1:9021/ledger/{cid}"
+  ],
+  "governance_ipfs_gateways": [
+    "https://ipfs.io/ipfs/{cid}",
+    "https://cloudflare-ipfs.com/ipfs/{cid}"
+  ]
+}

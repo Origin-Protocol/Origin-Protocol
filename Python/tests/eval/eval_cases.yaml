@@ -1,0 +1,165 @@
+cases:
+  - id: valid_sidecar
+    type: sidecar
+    media: fixtures/media/valid_media.mp4
+    sidecar: fixtures/sidecar/valid_sidecar.json
+    expected_ok: true
+  - id: sidecar_tampered_manifest
+    type: sidecar
+    media: fixtures/media/valid_media.mp4
+    sidecar: fixtures/sidecar/sidecar_with_tampered_manifest.json
+    expected_ok: false
+    expected_reason: bundle_hash_mismatch
+  - id: sidecar_wrong_public_key
+    type: sidecar
+    media: fixtures/media/valid_media.mp4
+    sidecar: fixtures/sidecar/sidecar_with_wrong_public_key.json
+    expected_ok: false
+    expected_reason: bundle_manifest_invalid
+  - id: mp4_valid_uuid_payload
+    type: mp4
+    media: fixtures/mp4/mp4_with_valid_uuid_payload.mp4
+    expected_ok: true
+  - id: mp4_wrong_uuid
+    type: mp4
+    media: fixtures/mp4/mp4_with_wrong_uuid.mp4
+    expected_ok: false
+    expected_reason: payload_missing_keys
+  - id: mkv_valid_origin_tag
+    type: mkv
+    media: fixtures/mkv/mkv_with_valid_origin_tag.mkv
+    expected_ok: true
+  - id: mkv_truncated_tag
+    type: mkv
+    media: fixtures/mkv/mkv_with_truncated_tag.mkv
+    expected_ok: false
+    expected_reason: payload_invalid_json
+  - id: sealed_bundle_valid
+    type: sealed_bundle
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: true
+  - id: sealed_bundle_tampered_manifest
+    type: sealed_bundle
+    bundle: fixtures/bundles/sealed_bundle_tampered_manifest.zip
+    expected_ok: false
+    expected_reason: bundle_manifest_invalid
+  - id: sealed_bundle_wrong_seal
+    type: sealed_bundle
+    bundle: fixtures/bundles/sealed_bundle_wrong_seal.zip
+    expected_ok: false
+    expected_reason: bundle_hash_mismatch
+  - id: policy_attestation_registry_valid
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: true
+    policy:
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_valid.json
+      attestation_signature_path: fixtures/attestation/attestation_valid.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+  - id: policy_attestation_invalid
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: false
+    expected_reason: attestation_invalid
+    policy:
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_valid.json
+      attestation_signature_path: fixtures/attestation/attestation_invalid.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+  - id: policy_attestation_creator_mismatch
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: false
+    expected_reason: attestation_creator_mismatch
+    policy:
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_creator_mismatch.json
+      attestation_signature_path: fixtures/attestation/attestation_creator_mismatch.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+  - id: policy_attestation_expired
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: false
+    expected_reason: attestation_expired
+    policy:
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_expired.json
+      attestation_signature_path: fixtures/attestation/attestation_expired.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+  - id: policy_registry_untrusted
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: false
+    expected_reason: key_untrusted
+    policy:
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_valid.json
+      attestation_signature_path: fixtures/attestation/attestation_valid.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_empty.json
+      require_key_id_match: true
+  - id: policy_profile_permissive
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: true
+    policy:
+      profile: permissive
+  - id: policy_profile_standard
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: true
+    policy:
+      profile: standard
+      platform: platform-1
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+      require_revocation_check: true
+      revocation_list_path: fixtures/revocation/revocation_empty.json
+  - id: policy_profile_strict_with_attestation
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: true
+    policy:
+      profile: strict
+      platform: platform-1
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_valid.json
+      attestation_signature_path: fixtures/attestation/attestation_valid.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+      require_revocation_check: true
+      revocation_list_path: fixtures/revocation/revocation_empty.json
+  - id: policy_profile_ultra_strict_attestation_invalid
+    type: policy
+    bundle: fixtures/bundles/sealed_bundle_valid.zip
+    expected_ok: false
+    expected_reason: attestation_invalid
+    policy:
+      profile: strict
+      platform: platform-1
+      require_attestation: true
+      attestation_path: fixtures/attestation/attestation_valid.json
+      attestation_signature_path: fixtures/attestation/attestation_invalid.sig
+      trust_store_path: fixtures/attestation/trust_store.json
+      require_key_registry: true
+      key_registry_path: fixtures/registry/registry_active.json
+      require_key_id_match: true
+      require_revocation_check: true
+      revocation_list_path: fixtures/revocation/revocation_empty.json

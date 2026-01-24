@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OriginPayload",
+  "type": "object",
+  "required": [
+    "origin_schema",
+    "origin_uuid",
+    "created_at",
+    "nonce",
+    "bundle_hash",
+    "manifest_hash",
+    "seal_hash",
+    "media_hash",
+    "key_id",
+    "payload"
+  ],
+  "properties": {
+    "origin_schema": { "type": "string" },
+    "origin_uuid": { "type": "string", "format": "uuid" },
+    "created_at": { "type": "string" },
+    "nonce": { "type": "string" },
+    "bundle_hash": { "type": "string" },
+    "manifest_hash": { "type": "string" },
+    "seal_hash": { "type": "string" },
+    "media_hash": { "type": "string" },
+    "key_id": { "type": "string" },
+    "media_filename": { "type": "string" },
+    "payload": {
+      "type": "object",
+      "required": [
+        "bundle.json",
+        "bundle.sig",
+        "manifest.json",
+        "signature.ed25519",
+        "seal.json",
+        "seal.ed25519",
+        "public_key.ed25519"
+      ],
+      "properties": {
+        "bundle.json": { "type": "string" },
+        "bundle.sig": { "type": "string" },
+        "manifest.json": { "type": "string" },
+        "signature.ed25519": { "type": "string" },
+        "seal.json": { "type": "string" },
+        "seal.ed25519": { "type": "string" },
+        "public_key.ed25519": { "type": "string" }
+      }
+    },
+    "box_signature": {
+      "type": ["object", "null"],
+      "properties": {
+        "algorithm": { "type": "string" },
+        "key_id": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    },
+    "tag_signature": {
+      "type": ["object", "null"],
+      "properties": {
+        "algorithm": { "type": "string" },
+        "key_id": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    },
+    "container_signature": {
+      "type": ["object", "null"],
+      "properties": {
+        "algorithm": { "type": "string" },
+        "key_id": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    },
+    "attestation_ref": { "type": ["string", "null"] },
+    "registry_ref": { "type": ["string", "null"] },
+    "revocation_ref": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

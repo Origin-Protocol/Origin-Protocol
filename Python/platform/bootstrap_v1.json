@@ -1,0 +1,7 @@
+{
+  "governance_ipfs_gateways": [],
+  "governance_ledger_cid": "sha256:f720f80b5ab754f6e2606877eebd37174f9d1e86556b6b37897767377f4a35f8",
+  "governance_node_endpoints": [],
+  "stable_url": "https://originprotocol.dev/bootstrap/platform_v1.json",
+  "version": "1.0"
+}

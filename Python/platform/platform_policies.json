@@ -1,0 +1,8 @@
+{
+  "default_profile": "standard",
+  "platforms": {
+    "tiktok": {"profile": "standard"},
+    "youtube": {"profile": "strict"},
+    "instagram": {"profile": "standard"}
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "attestation_id": "ea821d24-e048-45f1-87f6-d6e42af9bb74",
+  "attestation_type": "creator_identity",
+  "constraints_hash": "4f140abcbcd9202b09aa66186673b56f58b7e3287b51ec610bc5f5055c972c4b",
+  "issued_at": "2026-01-17T14:11:12.454778+00:00",
+  "issuer_id": "issuer-1",
+  "issuer_key_id": "69675ab8fe628171d0589fb32f34ae7d772af233b5781407a815935838e685c3",
+  "origin_version": "0.1",
+  "schema_version": "1.0",
+  "signature_algorithm": "ed25519",
+  "subject_creator_id": "creator-eval",
+  "subject_key_id": "3b82927497e7c9802b9e22417f900047bc604dcb99e652dafd5d753a58fde157",
+  "subject_public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAvlrf4W6f7Qah/ez0NQyqPKUJLPCGVMaAqpbGoyfVBt4=\n-----END PUBLIC KEY-----\n"
+}

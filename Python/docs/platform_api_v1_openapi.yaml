@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: Origin Platform Ledger API
+  version: 1.0.0
+  description: Platform-facing verification and policy endpoints.
+servers:
+  - url: http://127.0.0.1:9050
+paths:
+  /v1/ledger/verify:
+    post:
+      summary: Verify asset and policy status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+  /v1/ledger/key-status:
+    get:
+      summary: Key registry status
+      parameters:
+        - in: query
+          name: creator_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: key_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Key status result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyStatusResponse'
+  /v1/ledger/revocation-status:
+    get:
+      summary: Revocation status
+      parameters:
+        - in: query
+          name: creator_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: key_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: asset_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: content_hash
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: platform_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Revocation status result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevocationStatusResponse'
+  /v1/ledger/platform-policy:
+    get:
+      summary: Platform policy profile
+      parameters:
+        - in: query
+          name: platform_id
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Policy profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformPolicyResponse'
+components:
+  schemas:
+    VerifyRequest:
+      type: object
+      required:
+        - creator_id
+        - key_id
+        - asset_id
+        - content_hash
+        - platform_id
+      properties:
+        creator_id:
+          type: string
+        key_id:
+          type: string
+        asset_id:
+          type: string
+        content_hash:
+          type: string
+        platform_id:
+          type: string
+    ReasonPayload:
+      type: object
+      required:
+        - code
+        - message
+        - severity
+        - platform_action
+        - creator_action
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+        platform_action:
+          type: string
+        creator_action:
+          type: string
+    VerifyResponse:
+      type: object
+      required:
+        - ok
+        - reasons
+      properties:
+        ok:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReasonPayload'
+    KeyStatusResponse:
+      type: object
+      required:
+        - ok
+        - reasons
+      properties:
+        ok:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReasonPayload'
+        key_status:
+          type: string
+          nullable: true
+    RevocationStatusResponse:
+      type: object
+      required:
+        - ok
+        - reasons
+        - revoked
+      properties:
+        ok:
+          type: boolean
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReasonPayload'
+        revoked:
+          type: boolean
+    PlatformPolicyResponse:
+      type: object
+      required:
+        - ok
+        - policy
+      properties:
+        ok:
+          type: boolean
+        policy:
+          type: object
+          additionalProperties: true
+        governance:
+          type: object
+          nullable: true
+          additionalProperties: true

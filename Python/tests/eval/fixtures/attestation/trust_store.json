@@ -1,0 +1,11 @@
+{
+  "issuer_keys": [
+    {
+      "issuer_id": "issuer-1",
+      "key_id": "69675ab8fe628171d0589fb32f34ae7d772af233b5781407a815935838e685c3",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEANnMBLHBQ/E85JsKq4d25BYtTGiS4G+7svYTneMAydyo=\n-----END PUBLIC KEY-----\n",
+      "valid_from": "2024-01-01T00:00:00+00:00",
+      "valid_to": null
+    }
+  ]
+}

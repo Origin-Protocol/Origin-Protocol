@@ -1,0 +1,13 @@
+{
+  "created_at": "2026-01-17T14:11:12.452774+00:00",
+  "origin_version": "0.1",
+  "records": [
+    {
+      "creator_id": "creator-eval",
+      "key_id": "3b82927497e7c9802b9e22417f900047bc604dcb99e652dafd5d753a58fde157",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAvlrf4W6f7Qah/ez0NQyqPKUJLPCGVMaAqpbGoyfVBt4=\n-----END PUBLIC KEY-----\n",
+      "status": "active",
+      "valid_from": "2024-01-01T00:00:00+00:00"
+    }
+  ]
+}

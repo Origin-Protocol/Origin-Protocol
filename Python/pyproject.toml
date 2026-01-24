@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "origin-protocol"
+version = "0.2.0"
+description = "Creator-side ownership manifests and signatures for cross-platform content protection."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Origin Protocol" }
+]
+dependencies = [
+  "cryptography>=42.0.0",
+  "fastapi>=0.110.0",
+  "uvicorn[standard]>=0.30.0"
+]
+
+[project.scripts]
+origin = "origin_protocol.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,92 @@
+{
+  "cases": [
+    {
+      "case": "sidecar_valid",
+      "mutations": [
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "truncate"
+        },
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "flip_byte"
+        },
+        {
+          "errors": [
+            "payload_missing_field"
+          ],
+          "mutation": "remove_payload"
+        },
+        {
+          "errors": [
+            "payload_invalid_encoding"
+          ],
+          "mutation": "invalid_base64"
+        }
+      ]
+    },
+    {
+      "case": "mp4_payload",
+      "mutations": [
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "truncate"
+        },
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "flip_byte"
+        },
+        {
+          "errors": [
+            "payload_missing_field"
+          ],
+          "mutation": "remove_payload"
+        },
+        {
+          "errors": [
+            "payload_invalid_encoding"
+          ],
+          "mutation": "invalid_base64"
+        }
+      ]
+    },
+    {
+      "case": "mkv_payload",
+      "mutations": [
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "truncate"
+        },
+        {
+          "errors": [
+            "payload_invalid_json"
+          ],
+          "mutation": "flip_byte"
+        },
+        {
+          "errors": [
+            "payload_missing_field"
+          ],
+          "mutation": "remove_payload"
+        },
+        {
+          "errors": [
+            "payload_invalid_encoding"
+          ],
+          "mutation": "invalid_base64"
+        }
+      ]
+    }
+  ],
+  "total_cases": 3
+}
