@@ -9,6 +9,7 @@ from typing import Iterable, Mapping
 import uuid
 
 ORIGIN_VERSION = "0.1"
+ORIGIN_ID_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "origin-protocol:origin-id")
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,7 @@ class Manifest:
     origin_schema: str
     creator_id: str
     asset_id: str
+    origin_id: str | None
     created_at: str
     content_hash: str
     intended_platforms: tuple[str, ...]
@@ -42,6 +44,10 @@ def hash_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def compute_origin_id(key_id: str, content_hash: str) -> str:
+    return str(uuid.uuid5(ORIGIN_ID_NAMESPACE, f"{key_id}:{content_hash}"))
+
+
 def build_manifest(
     file_path: Path,
     creator_id: str,
@@ -56,11 +62,13 @@ def build_manifest(
 ) -> Manifest:
     created_at = datetime.now(timezone.utc).isoformat()
     content_hash = hash_file(file_path)
+    origin_id = compute_origin_id(key_id, content_hash) if key_id else None
     manifest = Manifest(
         manifest_id=str(uuid.uuid4()),
         origin_schema="1.0",
         creator_id=creator_id,
         asset_id=asset_id,
+        origin_id=origin_id,
         created_at=created_at,
         content_hash=content_hash,
         intended_platforms=tuple(intended_platforms or ()),
@@ -95,6 +103,7 @@ def manifest_from_bytes(data: bytes) -> Manifest:
         origin_schema=payload.get("origin_schema", "1.0"),
         creator_id=payload["creator_id"],
         asset_id=payload["asset_id"],
+        origin_id=payload.get("origin_id"),
         created_at=payload["created_at"],
         content_hash=payload["content_hash"],
         intended_platforms=tuple(payload.get("intended_platforms", [])),
@@ -119,6 +128,11 @@ def validate_manifest(manifest: Manifest) -> list[str]:
         errors.append("creator_id_missing")
     if not manifest.asset_id:
         errors.append("asset_id_missing")
+    if manifest.origin_id:
+        try:
+            uuid.UUID(manifest.origin_id)
+        except ValueError:
+            errors.append("origin_id_invalid")
     if not manifest.created_at:
         errors.append("created_at_missing")
     else:
@@ -132,6 +146,10 @@ def validate_manifest(manifest: Manifest) -> list[str]:
         errors.append("intended_platforms_missing")
     if manifest.signature_algorithm != "ed25519":
         errors.append("signature_algorithm_unsupported")
+    if manifest.origin_id and manifest.key_id:
+        expected_origin_id = compute_origin_id(manifest.key_id, manifest.content_hash)
+        if manifest.origin_id != expected_origin_id:
+            errors.append("origin_id_mismatch")
     return errors
 
 

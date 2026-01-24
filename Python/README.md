@@ -102,6 +102,7 @@ Illustrative examples are in [docs/fixtures/README.md](docs/fixtures/README.md).
 The manifest includes:
 - `creator_id`
 - `asset_id`
+- `origin_id` (deterministic UUID from `key_id` + `content_hash`)
 - `created_at`
 - `content_hash` (SHA-256 of the file)
 - `intended_platforms`

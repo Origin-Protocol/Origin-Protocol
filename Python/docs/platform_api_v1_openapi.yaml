@@ -63,6 +63,11 @@ paths:
           schema:
             type: string
         - in: query
+          name: origin_id
+          required: false
+          schema:
+            type: string
+        - in: query
           name: content_hash
           required: true
           schema:
@@ -111,6 +116,8 @@ components:
         key_id:
           type: string
         asset_id:
+          type: string
+        origin_id:
           type: string
         content_hash:
           type: string

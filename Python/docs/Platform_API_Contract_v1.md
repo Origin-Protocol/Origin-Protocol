@@ -14,6 +14,7 @@
   "creator_id": "...",
   "key_id": "...",
   "asset_id": "...",
+  "origin_id": "...",
   "content_hash": "...",
   "platform_id": "tiktok"
 }
@@ -56,7 +57,7 @@ Query params: creator_id, key_id
 ```
 
 ### GET /v1/ledger/revocation-status
-Query params: creator_id, key_id, asset_id, content_hash, platform_id
+Query params: creator_id, key_id, asset_id, origin_id, content_hash, platform_id
 
 **Response**
 ```

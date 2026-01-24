@@ -27,6 +27,7 @@ Request:
 - creator_id
 - key_id
 - asset_id
+- origin_id
 - content_hash
 - platform_id
 
@@ -49,6 +50,7 @@ Query:
 - creator_id
 - key_id
 - asset_id
+- origin_id
 - content_hash
 - platform_id
 

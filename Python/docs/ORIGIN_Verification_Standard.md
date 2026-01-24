@@ -32,6 +32,19 @@ bundle.json includes:
 - signature.ed25519
 - public_key.ed25519
 
+## 2.1) ORIGIN ID (manifest.origin_id)
+ORIGIN ID is a stable, canonical identifier for an asset.
+
+**Definition**
+- `origin_id` is a deterministic UUID derived from `content_hash` and the creator key fingerprint (`key_id`).
+
+**Derivation**
+- `origin_id = UUIDv5("origin-protocol:origin-id", "<key_id>:<content_hash>")`
+
+**Rules**
+- If `origin_id` is present, verifiers MUST recompute and compare.
+- If `key_id` is present, creators SHOULD include `origin_id` in the manifest.
+
 ## 3) Canonicalization (sealed bundles)
 - Deterministic ordering of entries by path.
 - Fixed timestamps in zip headers.
