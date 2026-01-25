@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import mimetypes
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -49,6 +50,10 @@ def create_sealed_bundle(
     private_key: Ed25519PrivateKey,
     public_key_path: Path,
     output_path: Path,
+    *,
+    compression: int = ZIP_DEFLATED,
+    compresslevel: int = 9,
+    allow_zip64: bool = True,
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     media_path = f"media/{file_path.name}"
@@ -60,6 +65,12 @@ def create_sealed_bundle(
 
     public_key_bytes = public_key_path.read_bytes()
     media_bytes = file_path.read_bytes()
+    mime_type, _ = mimetypes.guess_type(file_path.name)
+    media_summary = {
+        "filename": file_path.name,
+        "bytes": str(file_path.stat().st_size),
+        "mime_type": mime_type or "application/octet-stream",
+    }
     bundle_manifest = build_bundle_manifest(
         (
             ("manifest.json", manifest_bytes),
@@ -78,6 +89,7 @@ def create_sealed_bundle(
             "seal_hash": seal_hash(seal),
             "media_hash": seal.content_hash,
         },
+        media_summary=media_summary,
     )
     bundle_manifest_bytes = bundle_manifest_to_bytes(bundle_manifest)
     bundle_sig = private_key.sign(bundle_manifest_bytes)
@@ -85,13 +97,16 @@ def create_sealed_bundle(
     def _write_bytes(bundle: ZipFile, name: str, data: bytes) -> None:
         info = ZipInfo(name)
         info.date_time = (1980, 1, 1, 0, 0, 0)
-        info.compress_type = ZIP_DEFLATED
+        info.compress_type = compression
         info.external_attr = 0
         info.create_system = 0
         info.flag_bits = 0
-        bundle.writestr(info, data, compresslevel=9)
+        if info.compress_type == ZIP_STORED:
+            bundle.writestr(info, data)
+        else:
+            bundle.writestr(info, data, compresslevel=compresslevel)
 
-    with ZipFile(output_path, "w", compression=ZIP_DEFLATED, compresslevel=9) as bundle:
+    with ZipFile(output_path, "w", compression=compression, compresslevel=compresslevel, allowZip64=allow_zip64) as bundle:
         for name, data in sorted(
             (
                 ("bundle.json", bundle_manifest_bytes),

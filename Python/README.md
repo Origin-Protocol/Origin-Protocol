@@ -89,6 +89,8 @@ A sealed bundle is a single zip containing:
 - `seal.ed25519` (signature for the seal)
 - `media/<filename>` (the original media file)
 
+`bundle.json` may include `media_summary` (filename, mime_type, size bytes) for quick platform decisions.
+
 ## Container embedding
 See the draft spec in [docs/ORIGIN_Container_Embedding.md](docs/ORIGIN_Container_Embedding.md).
 
@@ -106,6 +108,12 @@ See [docs/ORIGIN_Node_Network.md](docs/ORIGIN_Node_Network.md).
 
 ## Canonicalization
 See the draft spec in [docs/ORIGIN_Canonicalization.md](docs/ORIGIN_Canonicalization.md).
+
+Canonicalization rules (implementation reference):
+- JSON is serialized with `sort_keys=True` and separators `","` and `":"`.
+- Bundle entries are ordered by path (ascending).
+- ZIP metadata is fixed (timestamp 1980-01-01, zeroed flags/attrs).
+- Compression uses DEFLATED with a fixed compresslevel by default; for bit‑for‑bit reproducibility across environments, use STORED (no compression).
 
 ## Platform SDKs
 - JS sidecar verifier: [sdks/js/README.md](sdks/js/README.md)

@@ -26,6 +26,7 @@ bundle.json includes:
 - manifest_hash, seal_hash, media_hash (optional but recommended)
 - signature_algorithm
 - canonicalization
+- media_summary (optional)
 
 ### Unsealed bundle (dir)
 - manifest.json
@@ -51,6 +52,12 @@ ORIGIN ID is a stable, canonical identifier for an asset.
 - Deterministic compression parameters.
 - bundle.json is the canonical file list; bundle.sig authenticates it.
 
+Implementation reference:
+- JSON serialization uses sort_keys=true and separators "," and ":".
+- ZIP headers set date_time to 1980-01-01 and zeroed flags/attrs.
+- For absolute byte‑stable archives across environments, use STORED (no compression).
+- ZIP64 SHOULD be enabled for large media bundles.
+
 ## 4) Verification steps
 ### Sealed bundle (MUST)
 1. Verify bundle.sig over bundle.json using public_key.ed25519.
@@ -63,6 +70,7 @@ ORIGIN ID is a stable, canonical identifier for an asset.
 7. Verify seal.content_hash == SHA-256(media bytes).
 8. Verify manifest.content_hash == seal.content_hash.
 9. If manifest.key_id exists, verify it matches the public key fingerprint.
+10. If manifest.origin_version or bundle_version is present, record the version used for verification.
 
 ### Embedded payload verification (MP4/MOV/MKV)
 - Validate embedded payload schema and origin_uuid.
@@ -79,6 +87,11 @@ ORIGIN ID is a stable, canonical identifier for an asset.
 	- seal.json via seal.ed25519
 - bundle.json authenticates the integrity of all bundled artifacts.
 - seal.json binds media bytes to manifest.json.
+
+Signature metadata:
+- Signature files are raw Ed25519 signatures.
+- signature_algorithm is declared in bundle.json and manifest.json.
+- key_id is stored in manifest.json and used for registry enforcement.
 
 ### Unsealed bundle (MUST)
 1. Verify manifest signature (signature.ed25519) over manifest.json.
