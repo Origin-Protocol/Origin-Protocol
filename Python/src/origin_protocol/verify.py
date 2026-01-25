@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
 
@@ -10,6 +11,15 @@ from .manifest import Manifest, hash_bytes, manifest_hash, manifest_to_bytes, ma
 from .seal import seal_from_bytes, seal_hash
 
 SUPPORTED_BUNDLE_SCHEMAS = {"1.0"}
+
+
+def _parse_datetime(value: str) -> datetime | None:
+    try:
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
 
 
 def verify_manifest(manifest: Manifest, signature: bytes, public_key: Ed25519PublicKey) -> bool:
@@ -24,11 +34,18 @@ def verify_bundle(bundle_dir: Path, public_key: Ed25519PublicKey | None = None) 
     manifest_path = bundle_dir / "manifest.json"
     signature_path = bundle_dir / "signature.ed25519"
     public_key_path = bundle_dir / "public_key.ed25519"
+    if not manifest_path.exists():
+        raise FileNotFoundError(manifest_path)
 
     manifest = read_manifest(manifest_path)
+
+    if not signature_path.exists():
+        return False, manifest
     signature = signature_path.read_bytes()
 
     if public_key is None:
+        if not public_key_path.exists():
+            return False, manifest
         from .keys import load_public_key
 
         public_key = load_public_key(public_key_path)
@@ -60,16 +77,39 @@ def verify_sealed_bundle_detailed(
     *,
     strict: bool = True,
 ) -> tuple[bool, Manifest, str | None]:
+    manifest = Manifest(
+        manifest_id="unknown",
+        origin_schema="1.0",
+        creator_id="unknown",
+        asset_id="unknown",
+        origin_id=None,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        content_hash="",
+        intended_platforms=(),
+        key_id=None,
+        signature_algorithm="ed25519",
+        origin_version="0.0",
+    )
+
     def _fail(reason: str) -> tuple[bool, Manifest, str]:
         return False, manifest, reason
 
     with ZipFile(bundle_path, "r") as bundle:
-        bundle_manifest_bytes = bundle.read("bundle.json")
-        bundle_sig = bundle.read("bundle.sig")
-        manifest_bytes = bundle.read("manifest.json")
-        manifest_sig = bundle.read("signature.ed25519")
-        seal_bytes = bundle.read("seal.json")
-        seal_sig = bundle.read("seal.ed25519")
+        try:
+            bundle_manifest_bytes = bundle.read("bundle.json")
+        except KeyError:
+            return _fail("bundle_manifest_missing")
+        try:
+            bundle_sig = bundle.read("bundle.sig")
+        except KeyError:
+            return _fail("bundle_signature_missing")
+        try:
+            manifest_bytes = bundle.read("manifest.json")
+            manifest_sig = bundle.read("signature.ed25519")
+            seal_bytes = bundle.read("seal.json")
+            seal_sig = bundle.read("seal.ed25519")
+        except KeyError:
+            return _fail("bundle_contents_mismatch")
 
         manifest = manifest_from_bytes(manifest_bytes)
 
@@ -111,10 +151,18 @@ def verify_sealed_bundle_detailed(
             return _fail("seal_invalid")
 
         seal = seal_from_bytes(seal_bytes)
-        if seal.created_at < manifest.created_at:
+        manifest_created_at = _parse_datetime(manifest.created_at)
+        if manifest_created_at is None:
+            return _fail("manifest_created_at_invalid")
+        seal_created_at = _parse_datetime(seal.created_at)
+        if seal_created_at is None:
             return _fail("seal_timestamp_invalid")
-
-        if bundle_manifest.created_at < manifest.created_at:
+        bundle_created_at = _parse_datetime(bundle_manifest.created_at)
+        if bundle_created_at is None:
+            return _fail("bundle_manifest_invalid")
+        if seal_created_at < manifest_created_at:
+            return _fail("seal_timestamp_invalid")
+        if bundle_created_at < manifest_created_at:
             return _fail("bundle_manifest_invalid")
 
         media_path = PurePosixPath(seal.media_path)

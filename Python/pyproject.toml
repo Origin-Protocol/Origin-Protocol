@@ -12,11 +12,25 @@ license = { text = "MIT" }
 authors = [
   { name = "Origin Protocol" }
 ]
+keywords = ["authenticity", "provenance", "media", "signature", "content"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent"
+]
 dependencies = [
   "cryptography>=42.0.0",
   "fastapi>=0.110.0",
   "uvicorn[standard]>=0.30.0"
 ]
+
+[project.urls]
+Homepage = "https://github.com/Origin-Protocol/Origin-Protocol"
+Documentation = "https://github.com/Origin-Protocol/Origin-Protocol/tree/main/Python/docs"
+Issues = "https://github.com/Origin-Protocol/Origin-Protocol/issues"
 
 [project.scripts]
 origin = "origin_protocol.cli:main"

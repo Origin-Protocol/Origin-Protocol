@@ -147,7 +147,11 @@ def _cmd_sign(args: argparse.Namespace) -> int:
 
 def _cmd_verify(args: argparse.Namespace) -> int:
     _require_file(Path(args.bundle_dir), "Bundle directory")
-    ok, manifest = verify_bundle(Path(args.bundle_dir))
+    try:
+        ok, manifest = verify_bundle(Path(args.bundle_dir))
+    except FileNotFoundError as exc:
+        _log(args, f"Bundle missing: {exc.filename}")
+        return 2
     if ok:
         _log(args, "Signature verified")
         _log(args, f"Creator: {manifest.creator_id}")

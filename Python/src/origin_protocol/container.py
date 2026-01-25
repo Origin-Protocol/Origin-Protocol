@@ -249,6 +249,13 @@ def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) ->
     if payload.get("origin_uuid") != ORIGIN_UUID:
         if _push("origin_uuid_mismatch"):
             return errors
+    created_at = payload.get("created_at")
+    if created_at is None:
+        if _push("payload_missing_created_at"):
+            return errors
+    elif _parse_created_at(created_at) is None:
+        if _push("payload_created_at_invalid"):
+            return errors
     if not isinstance(payload.get("payload"), dict):
         if _push("payload_missing_payload"):
             return errors

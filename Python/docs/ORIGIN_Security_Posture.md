@@ -15,6 +15,12 @@ This document summarizes the threat model, replay/tamper guidance, and key rotat
 - **Deterministic canonicalization** ensures consistent hashes across platforms.
 - **ORIGIN ID** (UUIDv5 of key_id + content_hash) provides a stable asset identifier.
 
+## Experimental identity state signatures
+- Identity state signatures are **Ed25519** (not HMAC/SHA).
+- Signature format: `ed25519:<key_id>:<base64_signature>`.
+- `key_id` must match the signing public key fingerprint.
+- Verification requires the state payload and the matching public key.
+
 ## Replay and tamper guidance
 - Always verify:
   - manifest signature

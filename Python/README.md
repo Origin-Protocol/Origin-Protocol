@@ -1,8 +1,39 @@
-# Origin Protocol (Python)
+## Origin Protocol (Python)
 
 A creator‑controlled authenticity layer for pre‑upload ownership proofs, independent of platforms and file formats.
 
 Creator-controlled metadata + signatures for pre-upload ownership proofs.
+
+## Executive summary
+Overall design is solid: layered artifacts (manifest, seal, bundle, container payload), deterministic canonicalization for signing, and multi‑language verifier SDKs are present.
+
+Major gaps that block production‑grade security and scaling:
+- Experimental identity state signatures must use asymmetric signing (Ed25519) or explicit HMAC only.
+- Large‑file handling and memory use need streaming paths end‑to‑end.
+- ZIP/compression determinism requires a reproducible spec or STORED mode.
+- Key management/trust discovery needs clear registry and revocation workflows.
+- Cross‑SDK canonicalization/interop vectors are incomplete.
+- Repo hygiene: LICENSE, CI, packaging metadata, and more tests.
+
+Top findings and risks (by severity):
+- **Critical:** experimental identity uses weak authenticity (state_identity.py).
+- **High:** key management & trust‑discovery not fully defined.
+- **High:** large files/memory usage not fully streaming.
+- **High:** ZIP compression determinism risk.
+- **Medium:** created_at ordering should parse datetimes.
+- **Medium:** canonicalization & cross‑SDK compatibility incomplete.
+- **Medium:** per‑signature metadata envelope not always present.
+- **Medium:** diagnostic vs fast‑fail error reporting tradeoffs.
+- **Low:** docs/CI/LICENSE/packaging/test vectors.
+
+Prioritized action plan (short list):
+1) Fix experimental identity signatures (Ed25519 or explicit HMAC) — Critical.
+2) Stream bundle/media hashing and zip reads/writes — High.
+3) Add STORED/no‑compression option or define deterministic compression — High.
+4) Parse created_at to datetimes for payload selection — Medium.
+5) Publish canonicalization spec and interop test vectors — Medium.
+6) Include per‑signature metadata (key_id, algorithm) in payload/manifest — Medium.
+7) Add CI, LICENSE, packaging metadata, signed fixtures — Low.
 
 ## Install
 - `pip install origin-protocol`
@@ -106,11 +137,19 @@ See [docs/ORIGIN_Trust_Anchor_Package.md](docs/ORIGIN_Trust_Anchor_Package.md) f
 ## Node network registry
 See [docs/ORIGIN_Node_Network.md](docs/ORIGIN_Node_Network.md).
 
+## Node registry reference implementation
+See [docs/ORIGIN_Node_Registry_Reference.md](docs/ORIGIN_Node_Registry_Reference.md).
+
 ## Canonicalization
 See the draft spec in [docs/ORIGIN_Canonicalization.md](docs/ORIGIN_Canonicalization.md).
 
+Canonicalization test vectors:
+- [docs/ORIGIN_Canonicalization_Test_Vectors.md](docs/ORIGIN_Canonicalization_Test_Vectors.md)
+
+Sealed bundle test vectors:
+- [docs/ORIGIN_Sealed_Bundle_Test_Vectors.md](docs/ORIGIN_Sealed_Bundle_Test_Vectors.md)
+
 Canonicalization rules (implementation reference):
-- JSON is serialized with `sort_keys=True` and separators `","` and `":"`.
 - Bundle entries are ordered by path (ascending).
 - ZIP metadata is fixed (timestamp 1980-01-01, zeroed flags/attrs).
 - Compression uses DEFLATED with a fixed compresslevel by default; for bit‑for‑bit reproducibility across environments, use STORED (no compression).
@@ -133,6 +172,9 @@ See [docs/ORIGIN_Onboarding_Checklist.md](docs/ORIGIN_Onboarding_Checklist.md) a
 
 ## Public telemetry
 See [docs/ORIGIN_Public_Telemetry.md](docs/ORIGIN_Public_Telemetry.md) for uptime, status, and audit log format.
+
+## License ledger hosting guidance
+See [docs/ORIGIN_License_Ledger_Hosting.md](docs/ORIGIN_License_Ledger_Hosting.md).
 
 ## Platform integration in 30 seconds
 POST /v1/ledger/verify

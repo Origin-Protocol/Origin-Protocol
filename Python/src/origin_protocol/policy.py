@@ -217,7 +217,24 @@ def verify_bundle_with_policy(
     file_path: Path | None = None,
     public_key: Ed25519PublicKey | None = None,
 ) -> PolicyResult:
-    ok_sig, manifest = verify_bundle(bundle_dir, public_key=public_key)
+    try:
+        ok_sig, manifest = verify_bundle(bundle_dir, public_key=public_key)
+    except FileNotFoundError:
+        reasons = ("bundle_manifest_missing",)
+        placeholder = Manifest(
+            manifest_id="unknown",
+            origin_schema="1.0",
+            creator_id="unknown",
+            asset_id="unknown",
+            origin_id=None,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            content_hash="",
+            intended_platforms=(),
+            key_id=None,
+            signature_algorithm="ed25519",
+            origin_version="0.0",
+        )
+        return PolicyResult(ok=False, reasons=reasons, manifest=placeholder)
     reasons = [] if ok_sig else ["signature_invalid"]
 
     if policy.require_seal:
@@ -274,7 +291,24 @@ def verify_sealed_bundle_with_policy(
     policy: VerificationPolicy,
     public_key: Ed25519PublicKey | None = None,
 ) -> PolicyResult:
-    ok, manifest = verify_sealed_bundle(bundle_path, public_key=public_key)
+    try:
+        ok, manifest = verify_sealed_bundle(bundle_path, public_key=public_key)
+    except FileNotFoundError:
+        reasons = ("bundle_missing",)
+        placeholder = Manifest(
+            manifest_id="unknown",
+            origin_schema="1.0",
+            creator_id="unknown",
+            asset_id="unknown",
+            origin_id=None,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            content_hash="",
+            intended_platforms=(),
+            key_id=None,
+            signature_algorithm="ed25519",
+            origin_version="0.0",
+        )
+        return PolicyResult(ok=False, reasons=reasons, manifest=placeholder)
     reasons = [] if ok else ["seal_invalid"]
 
     revocation_entries: tuple[object, ...] = ()
