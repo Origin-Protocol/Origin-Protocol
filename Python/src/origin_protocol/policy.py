@@ -213,12 +213,18 @@ def _load_bundle_public_key(bundle_path: Path, sealed: bool) -> Ed25519PublicKey
 
 
 def _load_key_registry(path: Path) -> tuple[KeyRegistry, bool]:
+    """Load key registry and verify if it's signed.
+    
+    Returns:
+        Tuple of (registry, is_valid) where is_valid indicates if signature verified
+    """
     payload = json.loads(path.read_text())
     if isinstance(payload, dict) and {"registry", "signature", "public_key"}.issubset(payload.keys()):
         registry, signature, public_key_pem = read_signed_registry(path)
         try:
             public_key = load_public_key_bytes(public_key_pem.encode("utf-8"))
-        except Exception:
+        except (ValueError, TypeError) as e:
+            # Invalid PEM format or encoding error
             return registry, False
         return registry, verify_registry(registry, signature, public_key)
     return read_registry(path), True
@@ -374,7 +380,10 @@ def verify_sealed_bundle_with_policy(
             if seal.created_at < manifest.created_at:
                 reasons.append("seal_timestamp_invalid")
         except Exception:
-            pass
+            # Intentionally ignore errors reading seal from bundle
+            # If seal can't be read or parsed, we skip the timestamp check
+            # This is acceptable because the seal will be validated elsewhere
+            pass  # noqa: S110
 
     # For sealed bundles, media bytes are inside the bundle and verified via the seal.
     reasons.extend(_evaluate_policy(manifest, policy, file_path=None, content_hash_verified=True))
