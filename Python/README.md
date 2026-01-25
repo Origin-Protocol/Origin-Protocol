@@ -98,6 +98,9 @@ See the draft spec in [docs/ORIGIN_Attestation.md](docs/ORIGIN_Attestation.md).
 ## Trust & governance
 See [docs/ORIGIN_Trust_Governance.md](docs/ORIGIN_Trust_Governance.md).
 
+## Trust anchor package
+See [docs/ORIGIN_Trust_Anchor_Package.md](docs/ORIGIN_Trust_Anchor_Package.md) for bootstrap, governance CID, and checksum flow.
+
 ## Node network registry
 See [docs/ORIGIN_Node_Network.md](docs/ORIGIN_Node_Network.md).
 
