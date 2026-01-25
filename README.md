@@ -2,7 +2,7 @@
 
 Creator-controlled metadata + signatures for pre-upload ownership proofs.
 
-Current version: 0.2.0
+Current version: 1.0
 
 ## What this is
 A minimal Python SDK + CLI that lets creators:
