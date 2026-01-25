@@ -2,6 +2,8 @@ Origin Protocol (Python SDK + CLI)
 Creator-controlled metadata + signatures for pre-upload ownership proofs.
 Version: 1.0 (Frozen)
 
+https://medium.com/@bkelleytms/origin-protocol-a-new-open-standard-for-creator-authenticity-527074b14c0c
+
 What this is
 A minimal, standards-compliant Python SDK and CLI for:
 - generating Ed25519 signing keys
