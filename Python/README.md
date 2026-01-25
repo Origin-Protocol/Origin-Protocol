@@ -176,6 +176,11 @@ The manifest includes:
 - `key_id` (public key fingerprint, optional)
 - `origin_version`
 
+Notes:
+- `origin_version` should be treated as a protocol version and kept consistent across SDKs.
+- Signing uses the compact canonical JSON (see canonicalization rules), while the on‑disk manifest may be pretty‑printed for readability.
+- `origin_id` is only present when `key_id` is set.
+
 ## Why ORIGIN ID exists
 ORIGIN ID is the canonical, stable identifier for an asset in the Origin ecosystem.
 It is deterministic, portable, and independent of platform, filename, or internal product tooling.

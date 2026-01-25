@@ -7,6 +7,9 @@ Applies to:
 - **Sealed bundle** (zip): bundle.json + bundle.sig + manifest + seal + media
 - **Unsealed bundle** (directory): manifest + signature + public key
 
+Versioning:
+- `origin_version` in manifests should match the protocol version declared by the SDK.
+
 ## 2) Required artifacts
 ### Sealed bundle (zip)
 - bundle.json (hashes of all internal files)
