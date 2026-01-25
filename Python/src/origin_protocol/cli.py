@@ -52,7 +52,18 @@ from .license import (
 from .manifest import ORIGIN_VERSION, build_manifest, manifest_from_bytes, read_manifest, validate_manifest
 from .policy import apply_policy_profile, VerificationPolicy, verify_bundle_with_policy, verify_sealed_bundle_with_policy
 from .sdk import as_dict, verify_sealed, verify_unsealed
-from .registry import KeyRecord, add_key_record, build_registry, read_registry, revoke_key, write_registry
+from .registry import (
+    KeyRecord,
+    add_key_record,
+    build_registry,
+    read_registry,
+    read_signed_registry,
+    revoke_key,
+    sign_registry,
+    verify_registry,
+    write_registry,
+    write_signed_registry,
+)
 from .reasons import REJECTION_REASONS
 from .revocation import (
     RevocationEntry,
@@ -322,6 +333,32 @@ def _cmd_key_revoke(args: argparse.Namespace) -> int:
     write_registry(registry, registry_path)
     _log(args, f"Key revoked: {args.key_id}")
     return 0
+
+
+def _cmd_registry_sign(args: argparse.Namespace) -> int:
+    registry_path = Path(args.registry)
+    _require_file(registry_path, "Registry")
+    _require_file(Path(args.private_key), "Private key")
+    _require_file(Path(args.public_key), "Public key")
+    output_path = Path(args.output)
+    _require_output(output_path, args)
+
+    registry = read_registry(registry_path)
+    signature = sign_registry(registry, load_private_key(Path(args.private_key)))
+    public_key_pem = Path(args.public_key).read_bytes()
+    write_signed_registry(registry, signature, public_key_pem, output_path)
+    _log(args, f"Signed registry written to: {args.output}")
+    return 0
+
+
+def _cmd_registry_verify(args: argparse.Namespace) -> int:
+    registry_path = Path(args.registry)
+    _require_file(registry_path, "Signed registry")
+    registry, signature, public_key_pem = read_signed_registry(registry_path)
+    public_key = load_public_key_bytes(public_key_pem.encode("utf-8"))
+    ok = verify_registry(registry, signature, public_key)
+    _log(args, "Registry signature verified" if ok else "Registry signature invalid")
+    return 0 if ok else 2
 
 
 def _cmd_revocation_init(args: argparse.Namespace) -> int:
@@ -809,6 +846,22 @@ def build_parser() -> argparse.ArgumentParser:
     key_revoke.add_argument("--quiet", action="store_true")
     key_revoke.add_argument("--verbose", action="store_true")
     key_revoke.set_defaults(func=_cmd_key_revoke)
+
+    registry_sign = sub.add_parser("registry-sign", help="Sign a key registry file")
+    registry_sign.add_argument("--registry", required=True, help="Registry JSON path")
+    registry_sign.add_argument("--private-key", required=True, help="Private key PEM")
+    registry_sign.add_argument("--public-key", required=True, help="Public key PEM")
+    registry_sign.add_argument("--output", default="key_registry.signed.json", help="Signed registry output path")
+    registry_sign.add_argument("--force", action="store_true", help="Overwrite existing output")
+    registry_sign.add_argument("--quiet", action="store_true")
+    registry_sign.add_argument("--verbose", action="store_true")
+    registry_sign.set_defaults(func=_cmd_registry_sign)
+
+    registry_verify = sub.add_parser("registry-verify", help="Verify a signed key registry")
+    registry_verify.add_argument("--registry", required=True, help="Signed registry JSON path")
+    registry_verify.add_argument("--quiet", action="store_true")
+    registry_verify.add_argument("--verbose", action="store_true")
+    registry_verify.set_defaults(func=_cmd_registry_verify)
 
     rev_init = sub.add_parser("revocation-init", help="Create a revocation list")
     rev_init.add_argument("--issuer-creator-id", required=True)
