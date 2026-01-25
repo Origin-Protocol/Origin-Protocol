@@ -8,15 +8,13 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Iterable
 
-# SECURITY WARNING: This module uses HMAC-based signatures which provide weaker
-# security guarantees than Ed25519 asymmetric signatures. For production use,
-# please migrate to state_identity_sig.py which provides Ed25519-based signatures.
-warnings.warn(
-    "state_identity.py uses HMAC authentication which is deprecated. "
-    "Please migrate to state_identity_sig.py for Ed25519 signatures.",
-    DeprecationWarning,
-    stacklevel=2,
-)
+"""
+SECURITY WARNING: This module uses HMAC-based signatures which provide weaker
+security guarantees than Ed25519 asymmetric signatures. For production use,
+please migrate to state_identity_sig.py which provides Ed25519-based signatures.
+
+This module is DEPRECATED and will be removed in version 1.0.0.
+"""
 
 
 @dataclass(frozen=True)
