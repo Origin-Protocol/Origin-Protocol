@@ -114,6 +114,9 @@ See [docs/ORIGIN_Platform_SDK.md](docs/ORIGIN_Platform_SDK.md).
 ## Reference integrations
 See [docs/ORIGIN_Integration_Cookbook.md](docs/ORIGIN_Integration_Cookbook.md) for Python/JS/Go snippets and a cURL cookbook.
 
+## Staging ledger service
+See [docs/ORIGIN_Staging_Ledger_Service.md](docs/ORIGIN_Staging_Ledger_Service.md) for base URL, API keys, rate limits, and metrics.
+
 ## Platform integration in 30 seconds
 POST /v1/ledger/verify
 ```
