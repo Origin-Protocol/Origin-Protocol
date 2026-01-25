@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import base64
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 from .manifest import ORIGIN_VERSION
 
@@ -103,6 +106,55 @@ def read_registry(path: Path) -> KeyRegistry:
         records=records,
         origin_version=payload.get("origin_version", ORIGIN_VERSION),
     )
+
+
+def sign_registry(registry: KeyRegistry, private_key: Ed25519PrivateKey) -> bytes:
+    return private_key.sign(registry_to_bytes(registry))
+
+
+def verify_registry(registry: KeyRegistry, signature: bytes, public_key: Ed25519PublicKey) -> bool:
+    try:
+        public_key.verify(signature, registry_to_bytes(registry))
+        return True
+    except Exception:
+        return False
+
+
+def write_signed_registry(
+    registry: KeyRegistry,
+    signature: bytes,
+    public_key_pem: bytes,
+    path: Path,
+) -> None:
+    payload = {
+        "registry": json.loads(registry_to_bytes(registry).decode("utf-8")),
+        "signature": base64.b64encode(signature).decode("ascii"),
+        "public_key": public_key_pem.decode("utf-8"),
+    }
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+
+
+def read_signed_registry(path: Path) -> tuple[KeyRegistry, bytes, str]:
+    payload = json.loads(path.read_text())
+    registry = KeyRegistry(
+        created_at=payload["registry"]["created_at"],
+        records=tuple(
+            KeyRecord(
+                creator_id=item["creator_id"],
+                key_id=item["key_id"],
+                public_key=item["public_key"],
+                status=item["status"],
+                valid_from=item["valid_from"],
+                valid_to=item.get("valid_to"),
+                superseded_by=item.get("superseded_by"),
+            )
+            for item in payload["registry"].get("records", [])
+        ),
+        origin_version=payload["registry"].get("origin_version", ORIGIN_VERSION),
+    )
+    signature = base64.b64decode(payload["signature"])
+    public_key_pem = payload["public_key"]
+    return registry, signature, public_key_pem
 
 
 def find_key_record(registry: KeyRegistry, creator_id: str, key_id: str) -> KeyRecord | None:
