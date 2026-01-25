@@ -9,7 +9,7 @@ Embedded payload JSON includes:
 - origin_uuid
 - created_at
 - nonce
-- bundle_hash
+- bundle_hash (SHA-256 of bundle.json bytes)
 - manifest_hash
 - seal_hash
 - media_hash
@@ -36,7 +36,7 @@ Until native container atoms are implemented, use a sidecar JSON file.
 - created_at
 - nonce
 - media_filename
-- bundle_hash
+- bundle_hash (SHA-256 of bundle.json bytes)
 - manifest_hash
 - seal_hash
 - media_hash
@@ -55,7 +55,7 @@ Until native container atoms are implemented, use a sidecar JSON file.
 
 ### Verification
 - Validate payload schema and origin_uuid.
-- Verify bundle.sig over bundle.json.
+- Verify bundle.sig over bundle.json (bundle.sig may be a JSON envelope).
 - Check hashes in bundle.json for all payload files.
 - Verify manifest and seal signatures.
 - Verify media SHA-256 matches seal.content_hash.
