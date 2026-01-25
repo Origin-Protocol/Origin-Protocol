@@ -1,5 +1,7 @@
 ## Origin Protocol (Python)
 
+![Origin Seal](docs/assets/origin-seal.png)
+
 A creator‑controlled authenticity layer for pre‑upload ownership proofs, independent of platforms and file formats.
 
 Creator-controlled metadata + signatures for pre-upload ownership proofs.
