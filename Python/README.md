@@ -123,6 +123,9 @@ See [docs/ORIGIN_Staging_Ledger_Service.md](docs/ORIGIN_Staging_Ledger_Service.m
 ## Platform onboarding kit
 See [docs/ORIGIN_Onboarding_Checklist.md](docs/ORIGIN_Onboarding_Checklist.md) and [docs/ORIGIN_SLA_Guidelines.md](docs/ORIGIN_SLA_Guidelines.md).
 
+## Public telemetry
+See [docs/ORIGIN_Public_Telemetry.md](docs/ORIGIN_Public_Telemetry.md) for uptime, status, and audit log format.
+
 ## Platform integration in 30 seconds
 POST /v1/ledger/verify
 ```
