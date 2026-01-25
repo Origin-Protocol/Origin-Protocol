@@ -92,7 +92,7 @@ def _build_origin_payload(
         "origin_uuid": ORIGIN_UUID,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "nonce": str(uuid.uuid4()),
-        "bundle_hash": hash_file(bundle_path),
+        "bundle_hash": hash_bytes(payload.bundle_manifest),
         "manifest_hash": manifest_hash(manifest),
         "seal_hash": seal_hash(seal),
         "media_hash": seal.content_hash,
@@ -330,6 +330,9 @@ def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) ->
             return errors
 
     bundle_manifest = bundle_manifest_from_bytes(bundle_manifest_bytes)
+    if payload.get("bundle_hash") != hash_bytes(bundle_manifest_bytes):
+        if _push("bundle_hash_mismatch"):
+            return errors
     entries = {entry.path: entry.sha256 for entry in bundle_manifest.entries}
     expected = {
         "manifest.json": manifest_bytes,
