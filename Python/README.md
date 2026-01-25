@@ -137,6 +137,9 @@ POST /v1/ledger/verify
 Rejections include category, subcategory, severity, is_fatal, actions, remediation, and localization/docs links.
 See [docs/ORIGIN_Error_Codes_v1.md](docs/ORIGIN_Error_Codes_v1.md) for the frozen v1 list.
 
+## Security posture
+See [docs/ORIGIN_Security_Posture.md](docs/ORIGIN_Security_Posture.md) for threat model, replay/tamper guidance, and key rotation policy.
+
 ## Versioning
 This project follows semantic versioning (MAJOR.MINOR.PATCH). See [CHANGELOG.md](CHANGELOG.md).
 
