@@ -31,7 +31,7 @@ Any changes require a new version of this document and a versioned API update.
 | seal_invalid | crypto | critical | reject_upload | Seal signature invalid |
 | bundle_manifest_invalid | crypto | critical | reject_upload | Bundle manifest signature invalid |
 | bundle_contents_mismatch | integrity | high | reject_upload | Bundle contents do not match bundle.json |
-| bundle_hash_mismatch | integrity | high | reject_upload | Bundle file hash mismatch |
+| bundle_hash_mismatch | integrity | high | reject_upload | Bundle manifest hash mismatch |
 | asset_record_missing | policy | high | require_manual_review | Asset record missing from platform ledger |
 | content_hash_mismatch | integrity | critical | reject_upload | Content hash mismatch |
 | platform_mismatch | policy | medium | reject_upload | Upload platform not in intended_platforms |
