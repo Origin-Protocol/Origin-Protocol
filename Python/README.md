@@ -86,6 +86,8 @@ Localization and exit codes:
 - `--exit-on-severity critical|high|medium|low`
 - `origin key-register` → add a public key to a registry
 - `origin key-revoke` → revoke a key in the registry
+- `origin registry-sign` → sign a key registry file
+- `origin registry-verify` → verify a signed key registry
 - `origin revocation-init` → create a revocation list
 - `origin revoke` → add a revocation entry
 - `origin revocation-sign` → sign a revocation list
