@@ -87,6 +87,12 @@ Use:
 - platform_tests/fixtures
 - platform_tests/cases.json
 
+## 7.1) Validation Checklist
+See [ORIGIN_Onboarding_Checklist.md](ORIGIN_Onboarding_Checklist.md).
+
+## 7.2) SLA Guidelines
+See [ORIGIN_SLA_Guidelines.md](ORIGIN_SLA_Guidelines.md).
+
 ## 8) Bootstrap & Governance
 
 Use the platform bootstrap file to anchor governance:

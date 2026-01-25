@@ -120,6 +120,9 @@ See [docs/ORIGIN_Integration_Cookbook.md](docs/ORIGIN_Integration_Cookbook.md) f
 ## Staging ledger service
 See [docs/ORIGIN_Staging_Ledger_Service.md](docs/ORIGIN_Staging_Ledger_Service.md) for base URL, API keys, rate limits, and metrics.
 
+## Platform onboarding kit
+See [docs/ORIGIN_Onboarding_Checklist.md](docs/ORIGIN_Onboarding_Checklist.md) and [docs/ORIGIN_SLA_Guidelines.md](docs/ORIGIN_SLA_Guidelines.md).
+
 ## Platform integration in 30 seconds
 POST /v1/ledger/verify
 ```
