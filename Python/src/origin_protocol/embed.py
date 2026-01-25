@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import mimetypes
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
+from importlib.resources import files
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -38,6 +39,12 @@ def create_bundle(
     signature = private_key.sign(manifest_to_bytes(manifest))
     signature_path.write_bytes(signature)
     public_key_dest.write_bytes(public_key_path.read_bytes())
+
+    seal_bytes = _load_origin_seal()
+    if seal_bytes:
+        assets_dir = output_dir / "assets"
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        (assets_dir / "origin-seal.png").write_bytes(seal_bytes)
 
     return BundlePaths(
         directory=output_dir,
@@ -74,6 +81,8 @@ def create_sealed_bundle(
         "bytes": str(file_path.stat().st_size),
         "mime_type": mime_type or "application/octet-stream",
     }
+    seal_asset_bytes = _load_origin_seal()
+    seal_asset_path = "assets/origin-seal.png"
     entries = (
         BundleEntry(path="manifest.json", sha256=hash_bytes(manifest_bytes)),
         BundleEntry(path="signature.ed25519", sha256=hash_bytes(manifest_sig)),
@@ -82,6 +91,8 @@ def create_sealed_bundle(
         BundleEntry(path="seal.ed25519", sha256=hash_bytes(seal_sig)),
         BundleEntry(path=media_path, sha256=seal.content_hash),
     )
+    if seal_asset_bytes:
+        entries = entries + (BundleEntry(path=seal_asset_path, sha256=hash_bytes(seal_asset_bytes)),)
     bundle_manifest = build_bundle_manifest_from_entries(
         entries,
         bundle_type="sealed",
@@ -146,6 +157,18 @@ def create_sealed_bundle(
             key=lambda item: item[0],
         ):
             _write_bytes(bundle, name, data)
+        if seal_asset_bytes:
+            _write_bytes(bundle, seal_asset_path, seal_asset_bytes)
         _write_file(bundle, media_path, file_path)
 
     return output_path
+
+
+def _load_origin_seal() -> bytes | None:
+    try:
+        asset = files("origin_protocol").joinpath("assets", "origin-seal.png")
+        if not asset.is_file():
+            return None
+        return asset.read_bytes()
+    except Exception:
+        return None
