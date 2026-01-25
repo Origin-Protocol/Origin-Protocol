@@ -71,13 +71,14 @@ def build_bundle_manifest_from_entries(
     proof_chain: Mapping[str, str] | None = None,
     media_summary: Mapping[str, str] | None = None,
 ) -> BundleManifest:
+    ordered_entries = tuple(sorted(entries, key=lambda entry: entry.path))
     return BundleManifest(
         bundle_id=str(uuid.uuid4()),
         origin_schema="1.0",
         bundle_type=bundle_type,
         bundle_version="1.0",
         created_at=datetime.now(timezone.utc).isoformat(),
-        entries=tuple(entries),
+        entries=ordered_entries,
         signature_metadata=signature_metadata,
         manifest_hash=manifest_hash_value,
         seal_hash=seal_hash_value,
