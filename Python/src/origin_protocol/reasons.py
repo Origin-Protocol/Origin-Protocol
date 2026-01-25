@@ -336,6 +336,15 @@ REJECTION_REASONS: dict[str, RejectionReason] = {
         "Provide a key registry for policy enforcement.",
         "require_manual_review",
     ),
+    "key_registry_invalid": _make_reason(
+        "key_registry_invalid",
+        "Key registry signature invalid",
+        "trust",
+        "registry",
+        "critical",
+        "Regenerate the signed key registry using the correct signing key.",
+        "reject_upload",
+    ),
     "seal_required": _make_reason(
         "seal_required",
         "Seal required by policy",

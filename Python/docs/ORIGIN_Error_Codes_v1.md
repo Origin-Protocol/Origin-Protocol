@@ -49,6 +49,7 @@ Any changes require a new version of this document and a versioned API update.
 | revocation_conflict | governance | high | require_manual_review | Revocation conflict detected |
 | seal_timestamp_invalid | integrity | high | reject_upload | Seal timestamp predates manifest |
 | key_registry_missing | trust | medium | require_manual_review | Key registry missing |
+| key_registry_invalid | trust | critical | reject_upload | Key registry signature invalid |
 | seal_required | policy | high | reject_upload | Seal required by policy |
 | content_hash_unchecked | policy | low | log_only | Content hash not verified |
 | attestation_missing | trust | high | reject_upload | Attestation missing |

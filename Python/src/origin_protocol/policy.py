@@ -4,6 +4,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZipFile
+import json
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
@@ -12,7 +13,7 @@ from cryptography.hazmat.primitives import serialization
 from .attestation import read_attestation, verify_attestation, load_trust_store
 from .keys import load_public_key_bytes, public_key_fingerprint
 from .manifest import Manifest, hash_file
-from .registry import read_registry
+from .registry import KeyRegistry, read_registry, read_signed_registry, verify_registry
 from .revocation import find_revocations, read_revocation_list
 from .seal import seal_from_bytes
 from .verify import verify_bundle, verify_sealed_bundle
@@ -211,6 +212,18 @@ def _load_bundle_public_key(bundle_path: Path, sealed: bool) -> Ed25519PublicKey
     return load_public_key_bytes(public_key_bytes)
 
 
+def _load_key_registry(path: Path) -> tuple[KeyRegistry, bool]:
+    payload = json.loads(path.read_text())
+    if isinstance(payload, dict) and {"registry", "signature", "public_key"}.issubset(payload.keys()):
+        registry, signature, public_key_pem = read_signed_registry(path)
+        try:
+            public_key = load_public_key_bytes(public_key_pem.encode("utf-8"))
+        except Exception:
+            return registry, False
+        return registry, verify_registry(registry, signature, public_key)
+    return read_registry(path), True
+
+
 def verify_bundle_with_policy(
     bundle_dir: Path,
     policy: VerificationPolicy,
@@ -257,7 +270,9 @@ def verify_bundle_with_policy(
     if policy.require_key_registry and policy.key_registry_path is None:
         reasons.append("key_registry_missing")
     elif policy.key_registry_path:
-        registry = read_registry(policy.key_registry_path)
+        registry, registry_ok = _load_key_registry(policy.key_registry_path)
+        if not registry_ok:
+            reasons.append("key_registry_invalid")
         bundle_public_key = public_key or _load_bundle_public_key(bundle_dir, sealed=False)
         bundle_key_id = public_key_fingerprint(bundle_public_key)
         if policy.require_key_id_match:
@@ -265,13 +280,14 @@ def verify_bundle_with_policy(
                 reasons.append("key_id_missing")
             elif manifest.key_id != bundle_key_id:
                 reasons.append("key_id_mismatch")
-        if manifest.key_id is None or manifest.key_id != bundle_key_id:
-            reasons.append("key_untrusted")
-        else:
-            from .registry import is_key_active
-
-            if not is_key_active(registry, manifest.creator_id, manifest.key_id):
+        if registry_ok:
+            if manifest.key_id is None or manifest.key_id != bundle_key_id:
                 reasons.append("key_untrusted")
+            else:
+                from .registry import is_key_active
+
+                if not is_key_active(registry, manifest.creator_id, manifest.key_id):
+                    reasons.append("key_untrusted")
 
     bundle_public_key = public_key or _load_bundle_public_key(bundle_dir, sealed=False)
     reasons.extend(_evaluate_attestation(manifest, policy, bundle_public_key))
@@ -328,7 +344,9 @@ def verify_sealed_bundle_with_policy(
     if policy.require_key_registry and policy.key_registry_path is None:
         reasons.append("key_registry_missing")
     elif policy.key_registry_path:
-        registry = read_registry(policy.key_registry_path)
+        registry, registry_ok = _load_key_registry(policy.key_registry_path)
+        if not registry_ok:
+            reasons.append("key_registry_invalid")
         bundle_public_key = public_key or _load_bundle_public_key(bundle_path, sealed=True)
         bundle_key_id = public_key_fingerprint(bundle_public_key)
         if policy.require_key_id_match:
@@ -336,13 +354,14 @@ def verify_sealed_bundle_with_policy(
                 reasons.append("key_id_missing")
             elif manifest.key_id != bundle_key_id:
                 reasons.append("key_id_mismatch")
-        if not manifest.key_id or manifest.key_id != bundle_key_id:
-            reasons.append("key_untrusted")
-        else:
-            from .registry import is_key_active
-
-            if not is_key_active(registry, manifest.creator_id, manifest.key_id):
+        if registry_ok:
+            if not manifest.key_id or manifest.key_id != bundle_key_id:
                 reasons.append("key_untrusted")
+            else:
+                from .registry import is_key_active
+
+                if not is_key_active(registry, manifest.creator_id, manifest.key_id):
+                    reasons.append("key_untrusted")
 
     bundle_public_key = public_key or _load_bundle_public_key(bundle_path, sealed=True)
     reasons.extend(_evaluate_attestation(manifest, policy, bundle_public_key))
