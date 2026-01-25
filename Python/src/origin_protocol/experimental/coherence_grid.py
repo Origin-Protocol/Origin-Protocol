@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable
 
 
 CellState = str
