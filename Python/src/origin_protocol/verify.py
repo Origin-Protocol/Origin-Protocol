@@ -47,15 +47,30 @@ def _decode_bundle_signature(
         return None, "bundle_manifest_invalid"
     try:
         return base64.b64decode(signature_b64.encode("ascii")), None
-    except Exception:
+    except (ValueError, TypeError) as e:
+        # ValueError: invalid base64 data
+        # TypeError: signature_b64 is not a string
         return None, "bundle_manifest_invalid"
 
 
 def verify_manifest(manifest: Manifest, signature: bytes, public_key: Ed25519PublicKey) -> bool:
+    """Verify manifest signature using Ed25519 public key.
+    
+    Args:
+        manifest: The manifest to verify
+        signature: Ed25519 signature bytes
+        public_key: Ed25519 public key for verification
+        
+    Returns:
+        True if signature is valid, False otherwise
+    """
     try:
         public_key.verify(signature, manifest_to_bytes(manifest))
         return True
     except Exception:
+        # InvalidSignature from cryptography library or any unexpected error
+        # We catch all exceptions here because signature verification should never
+        # crash the verification process - invalid signatures return False
         return False
 
 
@@ -83,10 +98,23 @@ def verify_bundle(bundle_dir: Path, public_key: Ed25519PublicKey | None = None) 
 
 
 def verify_seal(seal_bytes: bytes, signature: bytes, public_key: Ed25519PublicKey) -> bool:
+    """Verify seal signature using Ed25519 public key.
+    
+    Args:
+        seal_bytes: The seal data to verify
+        signature: Ed25519 signature bytes
+        public_key: Ed25519 public key for verification
+        
+    Returns:
+        True if signature is valid, False otherwise
+    """
     try:
         public_key.verify(signature, seal_bytes)
         return True
     except Exception:
+        # InvalidSignature from cryptography library or any unexpected error
+        # We catch all exceptions here because signature verification should never
+        # crash the verification process - invalid signatures return False
         return False
 
 
@@ -156,6 +184,8 @@ def verify_sealed_bundle_detailed(
         try:
             public_key.verify(decoded_sig, bundle_manifest_bytes)
         except Exception:
+            # InvalidSignature from cryptography library or any unexpected error
+            # Bundle signature verification failure - don't crash, return error
             return _fail("bundle_manifest_invalid")
 
         bundle_manifest = bundle_manifest_from_bytes(bundle_manifest_bytes)

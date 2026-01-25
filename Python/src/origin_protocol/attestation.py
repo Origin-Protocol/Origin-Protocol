@@ -121,10 +121,22 @@ def sign_attestation(attestation: CreatorAttestation, private_key: Ed25519Privat
 
 
 def verify_attestation(attestation: CreatorAttestation, signature: bytes, issuer_key: Ed25519PublicKey) -> bool:
+    """Verify attestation signature using issuer's Ed25519 public key.
+    
+    Args:
+        attestation: The attestation to verify
+        signature: Ed25519 signature bytes
+        issuer_key: Issuer's Ed25519 public key
+        
+    Returns:
+        True if signature is valid, False otherwise
+    """
     try:
         issuer_key.verify(signature, attestation_to_bytes(attestation))
         return True
     except Exception:
+        # InvalidSignature from cryptography library or any unexpected error
+        # Signature verification should never crash - invalid signatures return False
         return False
 
 

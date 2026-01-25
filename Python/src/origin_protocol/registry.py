@@ -113,10 +113,22 @@ def sign_registry(registry: KeyRegistry, private_key: Ed25519PrivateKey) -> byte
 
 
 def verify_registry(registry: KeyRegistry, signature: bytes, public_key: Ed25519PublicKey) -> bool:
+    """Verify registry signature using Ed25519 public key.
+    
+    Args:
+        registry: The key registry to verify
+        signature: Ed25519 signature bytes
+        public_key: Ed25519 public key for verification
+        
+    Returns:
+        True if signature is valid, False otherwise
+    """
     try:
         public_key.verify(signature, registry_to_bytes(registry))
         return True
     except Exception:
+        # InvalidSignature from cryptography library or any unexpected error
+        # Signature verification should never crash - invalid signatures return False
         return False
 
 

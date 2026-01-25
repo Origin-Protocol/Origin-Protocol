@@ -32,7 +32,9 @@ def parse_state_signature(value: str) -> StateSignature:
         raise ValueError("Invalid signature format")
     try:
         signature = b64decode(encoded.encode("ascii"), validate=True)
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
+        # ValueError: Invalid base64 encoding
+        # TypeError: Invalid input type
         raise ValueError("Invalid signature encoding") from exc
     return StateSignature(algorithm=algorithm, key_id=key_id, signature=signature)
 
@@ -76,6 +78,8 @@ def verify_state_signature(
     try:
         public_key.verify(parsed.signature, payload)
     except Exception:
+        # InvalidSignature from cryptography library or any unexpected error
+        # Signature verification should never crash - invalid signatures return False
         return False
 
     return True

@@ -3,9 +3,18 @@ from __future__ import annotations
 import hashlib
 import hmac
 import math
+import warnings
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Iterable
+
+"""
+SECURITY WARNING: This module uses HMAC-based signatures which provide weaker
+security guarantees than Ed25519 asymmetric signatures. For production use,
+please migrate to state_identity_sig.py which provides Ed25519-based signatures.
+
+This module is DEPRECATED and will be removed in version 1.0.0.
+"""
 
 
 @dataclass(frozen=True)
@@ -48,6 +57,26 @@ def _state_payload(state: IdentityState) -> bytes:
 
 
 def compute_state_signature(state: IdentityState, secret: str | None = None) -> str:
+    """Compute HMAC signature for identity state.
+    
+    SECURITY WARNING: This function uses HMAC which provides symmetric authentication.
+    It does not provide non-repudiation and is vulnerable to secret compromise.
+    For production use, migrate to state_identity_sig.sign_state() which uses Ed25519.
+    
+    Args:
+        state: The identity state to sign
+        secret: Optional HMAC secret. If None, returns plain SHA-256 hash (NO AUTH).
+    
+    Returns:
+        Hex-encoded signature or hash
+    """
+    if secret is None:
+        warnings.warn(
+            "compute_state_signature called without secret - returns unauthenticated hash. "
+            "Use state_identity_sig.sign_state() for production.",
+            UserWarning,
+            stacklevel=2,
+        )
     payload = _state_payload(state)
     if secret:
         return hmac.new(secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()

@@ -179,10 +179,21 @@ def _load_payload_json(payload_bytes: bytes) -> dict[str, object] | None:
 
 
 def _verify_signature(data: bytes, signature: bytes, public_key: Ed25519PublicKey) -> bool:
+    """Verify signature using Ed25519 public key.
+    
+    Args:
+        data: Data to verify
+        signature: Ed25519 signature bytes
+        public_key: Ed25519 public key
+        
+    Returns:
+        True if valid, False otherwise
+    """
     try:
         public_key.verify(signature, data)
         return True
     except Exception:
+        # InvalidSignature or any cryptography exception - treat as verification failure
         return False
 
 
@@ -208,7 +219,8 @@ def _decode_bundle_signature(
         return None, "bundle_manifest_invalid"
     try:
         return _b64decode(signature_b64), None
-    except Exception:
+    except (ValueError, TypeError) as e:
+        # ValueError: invalid base64, TypeError: not a string
         return None, "bundle_manifest_invalid"
 
 
@@ -312,7 +324,9 @@ def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) ->
         seal_bytes = _b64decode(payload_map_cast["seal.json"])
         seal_sig = _b64decode(payload_map_cast["seal.ed25519"])
         public_key_bytes = _b64decode(payload_map_cast["public_key.ed25519"])
-    except Exception:
+    except (ValueError, TypeError, KeyError) as e:
+        # ValueError/TypeError: invalid base64 encoding
+        # KeyError: required field missing
         errors.append("payload_invalid_encoding")
         return errors
 
@@ -405,6 +419,8 @@ def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) ->
             signed_bytes = _payload_bytes_for_signature(payload, signature_field)
             public_key.verify(signature_bytes, signed_bytes)
         except Exception:
+            # Base64 decode error, InvalidSignature, or other cryptography exception
+            # Treat all as signature verification failure
             if _push("container_signature_invalid"):
                 return errors
 
@@ -487,7 +503,10 @@ def verify_sidecar(media_path: Path, sidecar_path: Path, public_key: Ed25519Publ
         seal_bytes = _b64decode(payload["seal.json"])
         seal_sig = _b64decode(payload["seal.ed25519"])
         public_key_bytes = _b64decode(payload["public_key.ed25519"])
-    except Exception:
+    except (ValueError, TypeError, KeyError) as e:
+        # ValueError/TypeError: invalid base64 encoding
+        # KeyError: required field missing
+        return False, "sidecar_payload_invalid"
         return False, "sidecar_payload_invalid"
 
     if public_key is None:
