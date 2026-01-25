@@ -48,13 +48,34 @@ def build_bundle_manifest(
         BundleEntry(path=path, sha256=hash_bytes(content))
         for path, content in sorted(files, key=lambda item: item[0])
     )
+    return build_bundle_manifest_from_entries(
+        entries,
+        bundle_type=bundle_type,
+        manifest_hash_value=manifest_hash_value,
+        seal_hash_value=seal_hash_value,
+        media_hash_value=media_hash_value,
+        proof_chain=proof_chain,
+        media_summary=media_summary,
+    )
+
+
+def build_bundle_manifest_from_entries(
+    entries: Iterable[BundleEntry],
+    *,
+    bundle_type: str = "sealed",
+    manifest_hash_value: str | None = None,
+    seal_hash_value: str | None = None,
+    media_hash_value: str | None = None,
+    proof_chain: Mapping[str, str] | None = None,
+    media_summary: Mapping[str, str] | None = None,
+) -> BundleManifest:
     return BundleManifest(
         bundle_id=str(uuid.uuid4()),
         origin_schema="1.0",
         bundle_type=bundle_type,
         bundle_version="1.0",
         created_at=datetime.now(timezone.utc).isoformat(),
-        entries=entries,
+        entries=tuple(entries),
         manifest_hash=manifest_hash_value,
         seal_hash=seal_hash_value,
         media_hash=media_hash_value,

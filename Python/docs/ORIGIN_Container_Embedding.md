@@ -22,6 +22,11 @@ Embedded payload JSON includes:
 - registry_ref (optional)
 - revocation_ref (optional)
 
+### Container signature semantics
+- Container signatures are optional and are verified against the same public key used for the bundle.
+- key_id in the signature payload MUST match the manifest key_id.
+- Container signatures do not imply a separate authority unless explicitly documented by the platform.
+
 ## Interim (Sidecar) Mode
 Until native container atoms are implemented, use a sidecar JSON file.
 

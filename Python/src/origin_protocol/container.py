@@ -80,7 +80,6 @@ def _build_origin_payload(
     signature_field: str | None = None,
     signing_key: Ed25519PrivateKey | None = None,
 ) -> dict[str, object]:
-    bundle_bytes = bundle_path.read_bytes()
     payload = _load_bundle_payload(bundle_path)
     manifest = manifest_from_bytes(payload.manifest)
     seal = seal_from_bytes(payload.seal)
@@ -93,7 +92,7 @@ def _build_origin_payload(
         "origin_uuid": ORIGIN_UUID,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "nonce": str(uuid.uuid4()),
-        "bundle_hash": hash_bytes(bundle_bytes),
+        "bundle_hash": hash_file(bundle_path),
         "manifest_hash": manifest_hash(manifest),
         "seal_hash": seal_hash(seal),
         "media_hash": seal.content_hash,
@@ -191,11 +190,43 @@ def _require_fields(payload: Mapping[str, object], fields: tuple[str, ...]) -> b
     return all(field in payload for field in fields)
 
 
-def validate_origin_payload(payload_bytes: bytes) -> list[str]:
+def _parse_created_at(value: object) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        text = str(value)
+        if text.endswith("Z"):
+            text = text[:-1] + "+00:00"
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _pick_latest_payload(candidates: list[bytes]) -> bytes | None:
+    best_payload = None
+    best_created_at: datetime | None = None
+    for payload_bytes in candidates:
+        payload = _load_payload_json(payload_bytes)
+        if payload is None:
+            continue
+        created_at = _parse_created_at(payload.get("created_at"))
+        if created_at is None:
+            continue
+        if best_created_at is None or created_at > best_created_at:
+            best_created_at = created_at
+            best_payload = payload_bytes
+    return best_payload
+
+
+def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) -> list[str]:
     errors: list[str] = []
     payload = _load_payload_json(payload_bytes)
     if payload is None:
         return ["payload_invalid_json"]
+
+    def _push(code: str) -> bool:
+        errors.append(code)
+        return fast_fail
 
     required = (
         "origin_schema",
@@ -213,11 +244,14 @@ def validate_origin_payload(payload_bytes: bytes) -> list[str]:
         errors.append("payload_missing_field")
         return errors
     if payload.get("origin_schema") != ORIGIN_PAYLOAD_SCHEMA:
-        errors.append("origin_schema_mismatch")
+        if _push("origin_schema_mismatch"):
+            return errors
     if payload.get("origin_uuid") != ORIGIN_UUID:
-        errors.append("origin_uuid_mismatch")
+        if _push("origin_uuid_mismatch"):
+            return errors
     if not isinstance(payload.get("payload"), dict):
-        errors.append("payload_missing_payload")
+        if _push("payload_missing_payload"):
+            return errors
 
     payload_map = payload.get("payload")
     if not isinstance(payload_map, dict):
@@ -251,7 +285,8 @@ def validate_origin_payload(payload_bytes: bytes) -> list[str]:
 
     public_key = load_public_key_bytes(public_key_bytes)
     if not _verify_signature(bundle_manifest_bytes, bundle_sig, public_key):
-        errors.append("bundle_manifest_invalid")
+        if _push("bundle_manifest_invalid"):
+            return errors
 
     bundle_manifest = bundle_manifest_from_bytes(bundle_manifest_bytes)
     entries = {entry.path: entry.sha256 for entry in bundle_manifest.entries}
@@ -264,35 +299,45 @@ def validate_origin_payload(payload_bytes: bytes) -> list[str]:
     }
     for path, content in expected.items():
         if path not in entries:
-            errors.append("bundle_contents_mismatch")
+            if _push("bundle_contents_mismatch"):
+                return errors
             break
         if hash_bytes(content) != entries[path]:
-            errors.append("bundle_hash_mismatch")
+            if _push("bundle_hash_mismatch"):
+                return errors
             break
 
     manifest = manifest_from_bytes(manifest_bytes)
     if not _verify_signature(manifest_bytes, manifest_sig, public_key):
-        errors.append("signature_invalid")
+        if _push("signature_invalid"):
+            return errors
 
     seal = seal_from_bytes(seal_bytes)
     if not _verify_signature(seal_bytes, seal_sig, public_key):
-        errors.append("seal_invalid")
+        if _push("seal_invalid"):
+            return errors
 
     if manifest_hash(manifest) != seal.manifest_hash:
-        errors.append("bundle_manifest_invalid")
+        if _push("bundle_manifest_invalid"):
+            return errors
     if manifest.content_hash != seal.content_hash:
-        errors.append("content_hash_mismatch")
+        if _push("content_hash_mismatch"):
+            return errors
 
     if payload.get("manifest_hash") != manifest_hash(manifest):
-        errors.append("manifest_hash_mismatch")
+        if _push("manifest_hash_mismatch"):
+            return errors
     if payload.get("seal_hash") != seal_hash(seal):
-        errors.append("seal_hash_mismatch")
+        if _push("seal_hash_mismatch"):
+            return errors
     if payload.get("media_hash") != seal.content_hash:
-        errors.append("content_hash_mismatch")
+        if _push("content_hash_mismatch"):
+            return errors
 
     key_id = manifest.key_id or public_key_fingerprint(public_key)
     if payload.get("key_id") != key_id:
-        errors.append("key_id_mismatch")
+        if _push("key_id_mismatch"):
+            return errors
 
     signature_fields = ["box_signature", "tag_signature", "container_signature"]
     for signature_field in signature_fields:
@@ -300,21 +345,24 @@ def validate_origin_payload(payload_bytes: bytes) -> list[str]:
         if signature_payload is None:
             continue
         if not isinstance(signature_payload, dict):
-            errors.append("container_signature_invalid")
+            if _push("container_signature_invalid"):
+                return errors
             continue
         signature_payload_cast = cast(dict[str, object], signature_payload)
         algorithm = signature_payload_cast.get("algorithm")
         sig_key_id = signature_payload_cast.get("key_id")
         signature_b64 = signature_payload_cast.get("signature")
         if algorithm != "ed25519" or sig_key_id != key_id or not isinstance(signature_b64, str):
-            errors.append("container_signature_invalid")
+            if _push("container_signature_invalid"):
+                return errors
             continue
         try:
             signature_bytes = _b64decode(signature_b64)
             signed_bytes = _payload_bytes_for_signature(payload, signature_field)
             public_key.verify(signature_bytes, signed_bytes)
         except Exception:
-            errors.append("container_signature_invalid")
+            if _push("container_signature_invalid"):
+                return errors
 
     return errors
 
@@ -323,38 +371,23 @@ def extract_origin_payload(media_path: Path, sidecar_path: Path | None = None) -
     if sidecar_path is not None and sidecar_path.exists():
         sidecar = _load_sidecar(sidecar_path)
         payload_bytes = json.dumps(sidecar, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        if validate_origin_payload(payload_bytes) == []:
+        if validate_origin_payload(payload_bytes, fast_fail=True) == []:
             return payload_bytes
 
     if media_path.suffix.lower() == ".json":
         sidecar = _load_sidecar(media_path)
         payload_bytes = json.dumps(sidecar, sort_keys=True, separators=(",", ":")).encode("utf-8")
-        if validate_origin_payload(payload_bytes) == []:
+        if validate_origin_payload(payload_bytes, fast_fail=True) == []:
             return payload_bytes
-
-    def _pick_latest_payload(candidates: list[bytes]) -> bytes | None:
-        best_payload = None
-        best_created_at = None
-        for payload_bytes in candidates:
-            payload = _load_payload_json(payload_bytes)
-            if payload is None:
-                continue
-            created_at = payload.get("created_at")
-            if created_at is None:
-                continue
-            if best_created_at is None or str(created_at) > str(best_created_at):
-                best_created_at = created_at
-                best_payload = payload_bytes
-        return best_payload
 
     suffix = media_path.suffix.lower()
     if suffix in {".mp4", ".mov"}:
         payloads = [payload.payload for payload in extract_uuid_payloads(media_path)]
-        valid_payloads = [payload for payload in payloads if validate_origin_payload(payload) == []]
+        valid_payloads = [payload for payload in payloads if validate_origin_payload(payload, fast_fail=True) == []]
         return _pick_latest_payload(valid_payloads)
     if suffix in {".mkv"}:
         payloads = [payload.payload for payload in extract_mkv_payloads(media_path)]
-        valid_payloads = [payload for payload in payloads if validate_origin_payload(payload) == []]
+        valid_payloads = [payload for payload in payloads if validate_origin_payload(payload, fast_fail=True) == []]
         return _pick_latest_payload(valid_payloads)
     return None
 

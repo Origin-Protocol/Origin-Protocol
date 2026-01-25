@@ -27,7 +27,7 @@ payload = extract_origin_payload(Path("video.mp4"), sidecar_path=Path("origin.si
 if payload is None:
     raise ValueError("Missing Origin payload")
 
-errors = validate_origin_payload(payload)
+errors = validate_origin_payload(payload, fast_fail=True)
 if errors:
     raise ValueError(errors)
 ```
@@ -49,6 +49,9 @@ Each reason includes:
 
 ## Localization
 Load localization strings from [docs/locales/en.json](locales/en.json) and pass them to SDK helpers.
+
+## Canonicalization test vectors
+Use the canonical manifest vector in [docs/fixtures/canonical_manifest_vector.json](fixtures/canonical_manifest_vector.json) to confirm cross‑SDK JSON bytes match.
 
 ## CLI integration
 `origin policy-verify --json --localization docs/locales/en.json --exit-on-severity high`

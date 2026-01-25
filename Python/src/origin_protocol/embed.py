@@ -7,8 +7,8 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from .bundle import build_bundle_manifest, bundle_manifest_to_bytes
-from .manifest import Manifest, manifest_hash, manifest_to_bytes, write_manifest
+from .bundle import BundleEntry, build_bundle_manifest_from_entries, bundle_manifest_to_bytes
+from .manifest import Manifest, hash_bytes, manifest_hash, manifest_to_bytes, write_manifest
 from .seal import build_seal, seal_hash, seal_to_bytes
 
 
@@ -64,22 +64,22 @@ def create_sealed_bundle(
     seal_sig = private_key.sign(seal_bytes)
 
     public_key_bytes = public_key_path.read_bytes()
-    media_bytes = file_path.read_bytes()
     mime_type, _ = mimetypes.guess_type(file_path.name)
     media_summary = {
         "filename": file_path.name,
         "bytes": str(file_path.stat().st_size),
         "mime_type": mime_type or "application/octet-stream",
     }
-    bundle_manifest = build_bundle_manifest(
-        (
-            ("manifest.json", manifest_bytes),
-            ("signature.ed25519", manifest_sig),
-            ("public_key.ed25519", public_key_bytes),
-            ("seal.json", seal_bytes),
-            ("seal.ed25519", seal_sig),
-            (media_path, media_bytes),
-        ),
+    entries = (
+        BundleEntry(path="manifest.json", sha256=hash_bytes(manifest_bytes)),
+        BundleEntry(path="signature.ed25519", sha256=hash_bytes(manifest_sig)),
+        BundleEntry(path="public_key.ed25519", sha256=hash_bytes(public_key_bytes)),
+        BundleEntry(path="seal.json", sha256=hash_bytes(seal_bytes)),
+        BundleEntry(path="seal.ed25519", sha256=hash_bytes(seal_sig)),
+        BundleEntry(path=media_path, sha256=seal.content_hash),
+    )
+    bundle_manifest = build_bundle_manifest_from_entries(
+        entries,
         bundle_type="sealed",
         manifest_hash_value=manifest_hash(manifest),
         seal_hash_value=seal_hash(seal),
@@ -106,6 +106,17 @@ def create_sealed_bundle(
         else:
             bundle.writestr(info, data, compresslevel=compresslevel)
 
+    def _write_file(bundle: ZipFile, name: str, path: Path) -> None:
+        info = ZipInfo(name)
+        info.date_time = (1980, 1, 1, 0, 0, 0)
+        info.compress_type = compression
+        info.external_attr = 0
+        info.create_system = 0
+        info.flag_bits = 0
+        with bundle.open(info, "w") as dest, path.open("rb") as src:
+            for chunk in iter(lambda: src.read(1024 * 1024), b""):
+                dest.write(chunk)
+
     with ZipFile(output_path, "w", compression=compression, compresslevel=compresslevel, allowZip64=allow_zip64) as bundle:
         for name, data in sorted(
             (
@@ -116,10 +127,10 @@ def create_sealed_bundle(
                 ("public_key.ed25519", public_key_bytes),
                 ("seal.json", seal_bytes),
                 ("seal.ed25519", seal_sig),
-                (media_path, media_bytes),
             ),
             key=lambda item: item[0],
         ):
             _write_bytes(bundle, name, data)
+        _write_file(bundle, media_path, file_path)
 
     return output_path

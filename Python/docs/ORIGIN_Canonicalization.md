@@ -20,6 +20,10 @@ Ensure deterministic, reproducible bundles and signatures across platforms.
 - Deterministic compression (level 9)
 - No extra metadata fields
 
+Notes:
+- For absolute byte‑stable archives across environments, use STORED (no compression).
+- ZIP64 SHOULD be enabled for large media bundles.
+
 ## Bundle manifest (bundle.json)
 - Contains SHA-256 hashes for every file in the zip (except bundle.json, bundle.sig)
 - Sorted by path
@@ -27,3 +31,6 @@ Ensure deterministic, reproducible bundles and signatures across platforms.
 ## Sidecar canonicalization
 - Payload is base64 encoding of the same files listed in bundle.json
 - Verification MUST re-hash payload file bytes and compare with bundle.json
+
+## Cross‑SDK test vectors
+Use [docs/fixtures/canonical_manifest_vector.json](fixtures/canonical_manifest_vector.json) to verify JSON canonicalization output and hash across SDKs.

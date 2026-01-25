@@ -635,7 +635,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
             attestation = read_attestation(path)
             errors = validate_attestation_structure(attestation)
         elif kind == "origin-payload":
-            errors = validate_origin_payload(path.read_bytes())
+            errors = validate_origin_payload(path.read_bytes(), fast_fail=args.fast_fail)
         elif kind == "trust-store":
             load_trust_store(path)
         elif kind == "registry":
@@ -995,6 +995,7 @@ def build_parser() -> argparse.ArgumentParser:
         "revocation-list",
     ])
     validate.add_argument("--path", required=True)
+    validate.add_argument("--fast-fail", action="store_true", help="Stop at the first validation error")
     validate.add_argument("--quiet", action="store_true")
     validate.add_argument("--verbose", action="store_true")
     validate.set_defaults(func=_cmd_validate)
