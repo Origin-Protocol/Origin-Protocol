@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import json
 from dataclasses import dataclass
 import mimetypes
 from pathlib import Path
@@ -8,6 +10,7 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile, ZipInfo
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from .bundle import BundleEntry, build_bundle_manifest_from_entries, bundle_manifest_to_bytes
+from .keys import load_public_key_bytes, public_key_fingerprint
 from .manifest import Manifest, hash_bytes, manifest_hash, manifest_to_bytes, write_manifest
 from .seal import build_seal, seal_hash, seal_to_bytes
 
@@ -64,6 +67,7 @@ def create_sealed_bundle(
     seal_sig = private_key.sign(seal_bytes)
 
     public_key_bytes = public_key_path.read_bytes()
+    bundle_key_id = manifest.key_id or public_key_fingerprint(load_public_key_bytes(public_key_bytes))
     mime_type, _ = mimetypes.guess_type(file_path.name)
     media_summary = {
         "filename": file_path.name,
@@ -81,6 +85,11 @@ def create_sealed_bundle(
     bundle_manifest = build_bundle_manifest_from_entries(
         entries,
         bundle_type="sealed",
+        signature_metadata={
+            "bundle": {"algorithm": "ed25519", "key_id": bundle_key_id},
+            "manifest": {"algorithm": "ed25519", "key_id": bundle_key_id},
+            "seal": {"algorithm": "ed25519", "key_id": bundle_key_id},
+        },
         manifest_hash_value=manifest_hash(manifest),
         seal_hash_value=seal_hash(seal),
         media_hash_value=seal.content_hash,
@@ -93,6 +102,12 @@ def create_sealed_bundle(
     )
     bundle_manifest_bytes = bundle_manifest_to_bytes(bundle_manifest)
     bundle_sig = private_key.sign(bundle_manifest_bytes)
+    bundle_sig_envelope = {
+        "algorithm": "ed25519",
+        "key_id": bundle_key_id,
+        "signature": base64.b64encode(bundle_sig).decode("ascii"),
+    }
+    bundle_sig_bytes = json.dumps(bundle_sig_envelope, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
     def _write_bytes(bundle: ZipFile, name: str, data: bytes) -> None:
         info = ZipInfo(name)
@@ -121,7 +136,7 @@ def create_sealed_bundle(
         for name, data in sorted(
             (
                 ("bundle.json", bundle_manifest_bytes),
-                ("bundle.sig", bundle_sig),
+                ("bundle.sig", bundle_sig_bytes),
                 ("manifest.json", manifest_bytes),
                 ("signature.ed25519", manifest_sig),
                 ("public_key.ed25519", public_key_bytes),

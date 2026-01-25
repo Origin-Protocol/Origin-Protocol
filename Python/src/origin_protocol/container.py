@@ -186,6 +186,32 @@ def _verify_signature(data: bytes, signature: bytes, public_key: Ed25519PublicKe
         return False
 
 
+def _decode_bundle_signature(
+    signature_bytes: bytes,
+    *,
+    expected_key_id: str | None = None,
+) -> tuple[bytes | None, str | None]:
+    try:
+        payload = json.loads(signature_bytes)
+    except json.JSONDecodeError:
+        return signature_bytes, None
+    if not isinstance(payload, dict):
+        return None, "bundle_manifest_invalid"
+    algorithm = payload.get("algorithm")
+    key_id = payload.get("key_id")
+    signature_b64 = payload.get("signature")
+    if algorithm and algorithm != "ed25519":
+        return None, "bundle_manifest_invalid"
+    if expected_key_id and key_id and key_id != expected_key_id:
+        return None, "key_id_mismatch"
+    if not isinstance(signature_b64, str):
+        return None, "bundle_manifest_invalid"
+    try:
+        return _b64decode(signature_b64), None
+    except Exception:
+        return None, "bundle_manifest_invalid"
+
+
 def _require_fields(payload: Mapping[str, object], fields: tuple[str, ...]) -> bool:
     return all(field in payload for field in fields)
 
@@ -291,7 +317,15 @@ def validate_origin_payload(payload_bytes: bytes, *, fast_fail: bool = False) ->
         return errors
 
     public_key = load_public_key_bytes(public_key_bytes)
-    if not _verify_signature(bundle_manifest_bytes, bundle_sig, public_key):
+    bundle_key_id = public_key_fingerprint(public_key)
+    decoded_sig, sig_error = _decode_bundle_signature(bundle_sig, expected_key_id=bundle_key_id)
+    if sig_error:
+        if _push(sig_error):
+            return errors
+    if decoded_sig is None:
+        if _push("bundle_manifest_invalid"):
+            return errors
+    elif not _verify_signature(bundle_manifest_bytes, decoded_sig, public_key):
         if _push("bundle_manifest_invalid"):
             return errors
 
@@ -456,7 +490,13 @@ def verify_sidecar(media_path: Path, sidecar_path: Path, public_key: Ed25519Publ
     if public_key is None:
         public_key = load_public_key_bytes(public_key_bytes)
 
-    if not _verify_signature(bundle_manifest_bytes, bundle_sig, public_key):
+    bundle_key_id = public_key_fingerprint(public_key)
+    decoded_sig, sig_error = _decode_bundle_signature(bundle_sig, expected_key_id=bundle_key_id)
+    if sig_error:
+        return False, sig_error
+    if decoded_sig is None:
+        return False, "bundle_manifest_invalid"
+    if not _verify_signature(bundle_manifest_bytes, decoded_sig, public_key):
         return False, "bundle_manifest_invalid"
 
     bundle_manifest = bundle_manifest_from_bytes(bundle_manifest_bytes)

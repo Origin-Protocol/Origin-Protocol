@@ -138,7 +138,7 @@ class RegistryRequestHandler(BaseHTTPRequestHandler):
 
         self._send_not_found()
 
-    def log_message(self, fmt: str, *args: object) -> None:
+    def log_message(self, format: str, *args: object) -> None:
         return
 
     def _send_not_found(self) -> None:

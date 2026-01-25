@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import json
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
@@ -7,6 +9,7 @@ from zipfile import ZipFile
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from .bundle import bundle_manifest_from_bytes
+from .keys import public_key_fingerprint
 from .manifest import Manifest, hash_bytes, manifest_hash, manifest_to_bytes, manifest_from_bytes, read_manifest
 from .seal import seal_from_bytes, seal_hash
 
@@ -20,6 +23,32 @@ def _parse_datetime(value: str) -> datetime | None:
         return datetime.fromisoformat(value)
     except ValueError:
         return None
+
+
+def _decode_bundle_signature(
+    signature_bytes: bytes,
+    *,
+    expected_key_id: str | None = None,
+) -> tuple[bytes | None, str | None]:
+    try:
+        payload = json.loads(signature_bytes)
+    except json.JSONDecodeError:
+        return signature_bytes, None
+    if not isinstance(payload, dict):
+        return None, "bundle_manifest_invalid"
+    algorithm = payload.get("algorithm")
+    key_id = payload.get("key_id")
+    signature_b64 = payload.get("signature")
+    if algorithm and algorithm != "ed25519":
+        return None, "bundle_manifest_invalid"
+    if expected_key_id and key_id and key_id != expected_key_id:
+        return None, "key_id_mismatch"
+    if not isinstance(signature_b64, str):
+        return None, "bundle_manifest_invalid"
+    try:
+        return base64.b64decode(signature_b64.encode("ascii")), None
+    except Exception:
+        return None, "bundle_manifest_invalid"
 
 
 def verify_manifest(manifest: Manifest, signature: bytes, public_key: Ed25519PublicKey) -> bool:
@@ -118,8 +147,14 @@ def verify_sealed_bundle_detailed(
 
             public_key = load_public_key_bytes(bundle.read("public_key.ed25519"))
 
+        key_id = manifest.key_id or public_key_fingerprint(public_key)
+        decoded_sig, sig_error = _decode_bundle_signature(bundle_sig, expected_key_id=key_id)
+        if sig_error:
+            return _fail(sig_error)
+        if decoded_sig is None:
+            return _fail("bundle_manifest_invalid")
         try:
-            public_key.verify(bundle_sig, bundle_manifest_bytes)
+            public_key.verify(decoded_sig, bundle_manifest_bytes)
         except Exception:
             return _fail("bundle_manifest_invalid")
 
@@ -128,6 +163,19 @@ def verify_sealed_bundle_detailed(
             return _fail("bundle_manifest_invalid")
         if bundle_manifest.signature_algorithm != "ed25519":
             return _fail("bundle_manifest_invalid")
+        if bundle_manifest.signature_metadata:
+            for label in ("bundle", "manifest", "seal"):
+                info = bundle_manifest.signature_metadata.get(label)
+                if info is None:
+                    continue
+                if not isinstance(info, dict):
+                    return _fail("bundle_manifest_invalid")
+                algorithm = info.get("algorithm")
+                sig_key_id = info.get("key_id")
+                if algorithm and algorithm != "ed25519":
+                    return _fail("bundle_manifest_invalid")
+                if sig_key_id and key_id and sig_key_id != key_id:
+                    return _fail("key_id_mismatch")
         if strict and (
             not bundle_manifest.manifest_hash
             or not bundle_manifest.seal_hash

@@ -23,6 +23,7 @@ class BundleManifest:
     bundle_version: str
     created_at: str
     entries: tuple[BundleEntry, ...]
+    signature_metadata: Mapping[str, Mapping[str, str]] | None = None
     manifest_hash: str | None = None
     seal_hash: str | None = None
     media_hash: str | None = None
@@ -63,6 +64,7 @@ def build_bundle_manifest_from_entries(
     entries: Iterable[BundleEntry],
     *,
     bundle_type: str = "sealed",
+    signature_metadata: Mapping[str, Mapping[str, str]] | None = None,
     manifest_hash_value: str | None = None,
     seal_hash_value: str | None = None,
     media_hash_value: str | None = None,
@@ -76,6 +78,7 @@ def build_bundle_manifest_from_entries(
         bundle_version="1.0",
         created_at=datetime.now(timezone.utc).isoformat(),
         entries=tuple(entries),
+        signature_metadata=signature_metadata,
         manifest_hash=manifest_hash_value,
         seal_hash=seal_hash_value,
         media_hash=media_hash_value,
@@ -100,6 +103,7 @@ def bundle_manifest_from_bytes(data: bytes) -> BundleManifest:
         bundle_version=payload.get("bundle_version", "1.0"),
         created_at=payload["created_at"],
         entries=entries,
+        signature_metadata=payload.get("signature_metadata"),
         manifest_hash=payload.get("manifest_hash"),
         seal_hash=payload.get("seal_hash"),
         media_hash=payload.get("media_hash"),

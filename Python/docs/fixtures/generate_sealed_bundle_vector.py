@@ -6,12 +6,14 @@ import tempfile
 from pathlib import Path
 from zipfile import ZipFile
 
+from dataclasses import replace
+
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from origin_protocol.embed import create_sealed_bundle
 from origin_protocol.keys import public_key_fingerprint
-from origin_protocol.manifest import Manifest, compute_origin_id, hash_file, ORIGIN_VERSION
+from origin_protocol.manifest import build_manifest, hash_file
 
 
 def _hash_bytes(data: bytes) -> str:
@@ -42,19 +44,17 @@ def main() -> None:
         )
 
         content_hash = hash_file(media_path)
-        origin_id = compute_origin_id(key_id, content_hash)
-        manifest = Manifest(
-            manifest_id="00000000-0000-0000-0000-000000000002",
-            origin_schema="1.0",
+        manifest = build_manifest(
+            file_path=media_path,
             creator_id="creator-123",
             asset_id="asset-123",
-            origin_id=origin_id,
-            created_at="2026-01-15T00:00:00+00:00",
-            content_hash=content_hash,
             intended_platforms=("yt", "tt"),
             key_id=key_id,
-            signature_algorithm="ed25519",
-            origin_version=ORIGIN_VERSION,
+        )
+        manifest = replace(
+            manifest,
+            manifest_id="00000000-0000-0000-0000-000000000002",
+            created_at="2026-01-15T00:00:00+00:00",
         )
 
         create_sealed_bundle(
