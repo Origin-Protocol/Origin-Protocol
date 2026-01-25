@@ -63,7 +63,7 @@ Implementation reference:
 
 ## 4) Verification steps
 ### Sealed bundle (MUST)
-1. Verify bundle.sig over bundle.json using public_key.ed25519.
+1. Verify bundle.sig over bundle.json using public_key.ed25519 (bundle.sig may be a JSON envelope).
 2. Ensure bundle.json file list equals the zip contents (excluding bundle.json, bundle.sig).
 3. Hash each listed file and compare to bundle.json.
 4. Verify manifest signature (signature.ed25519) over manifest.json.
@@ -77,7 +77,7 @@ Implementation reference:
 
 ### Embedded payload verification (MP4/MOV/MKV)
 - Validate embedded payload schema and origin_uuid.
-- Verify bundle_hash matches hash of sealed bundle.
+- Verify bundle_hash matches SHA-256(bundle.json bytes).
 - Verify manifest_hash matches manifest.json.
 - Verify seal_hash matches seal.json.
 - Verify media_hash matches the container media bytes.
@@ -92,8 +92,9 @@ Implementation reference:
 - seal.json binds media bytes to manifest.json.
 
 Signature metadata:
-- Signature files are raw Ed25519 signatures.
+- bundle.sig MAY be a JSON envelope: {"algorithm":"ed25519","key_id":"<id>","signature":"<base64>"}.
 - signature_algorithm is declared in bundle.json and manifest.json.
+- signature_metadata in bundle.json may include key_id per signature (bundle/manifest/seal).
 - key_id is stored in manifest.json and used for registry enforcement.
 
 ### Unsealed bundle (MUST)
