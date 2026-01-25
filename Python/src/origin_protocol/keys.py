@@ -92,10 +92,20 @@ def public_key_fingerprint(public_key: Ed25519PublicKey) -> str:
 
 
 def validate_public_key_pem(pem: str) -> bool:
+    """Validate that a PEM string is a valid Ed25519 public key.
+    
+    Args:
+        pem: PEM-formatted public key string
+        
+    Returns:
+        True if valid, False otherwise
+    """
     try:
         serialization.load_pem_public_key(pem.encode("utf-8"))
         return True
-    except Exception:
+    except (ValueError, TypeError):
+        # ValueError: Invalid PEM format
+        # TypeError: Invalid input type
         return False
 
 

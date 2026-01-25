@@ -54,10 +54,33 @@ def create_sealed_bundle(
     public_key_path: Path,
     output_path: Path,
     *,
-    compression: int = ZIP_DEFLATED,
+    compression: int = ZIP_STORED,  # Changed from ZIP_DEFLATED for deterministic output
     compresslevel: int = 9,
     allow_zip64: bool = True,
 ) -> Path:
+    """Create a sealed bundle containing media file and all Origin Protocol artifacts.
+    
+    Args:
+        file_path: Path to the media file to seal
+        manifest: The manifest for this file
+        private_key: Ed25519 private key for signing
+        public_key_path: Path to public key file
+        output_path: Where to write the sealed bundle ZIP
+        compression: ZIP compression method (default: ZIP_STORED for deterministic output)
+        compresslevel: Compression level 0-9 (only applies if using ZIP_DEFLATED)
+        allow_zip64: Allow ZIP64 extensions for large files
+        
+    Returns:
+        Path to the created sealed bundle
+        
+    Note:
+        By default, ZIP_STORED (no compression) is used to ensure bit-for-bit
+        reproducibility across platforms and Python versions. DEFLATE compression
+        can vary by zlib version, which breaks deterministic verification.
+        
+        For compressed bundles, explicitly pass compression=ZIP_DEFLATED, but be
+        aware this may cause cross-platform verification failures.
+    """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     media_path = f"media/{file_path.name}"
     manifest_bytes = manifest_to_bytes(manifest)
