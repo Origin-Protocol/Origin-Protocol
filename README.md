@@ -27,8 +27,6 @@ origin verify myvideo.originbundle
 
 
 
-CLI Commands
-(Your existing list is perfect — keep it.)
 
 Bundle Formats
 Short, clean descriptions of:
