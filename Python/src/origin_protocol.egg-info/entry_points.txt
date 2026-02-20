@@ -1,2 +1,0 @@
-[console_scripts]
-origin = origin_protocol.cli:main

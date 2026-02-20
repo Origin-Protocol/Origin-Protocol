@@ -19,3 +19,6 @@ Python/admin_gui/
 **/__pycache__/
 *.pyc
 *.pyo
+
+# Python packaging build artifacts
+**/*.egg-info/
