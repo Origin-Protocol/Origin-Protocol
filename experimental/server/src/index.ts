@@ -13,6 +13,10 @@ import usersRouter from './routes/users';
 import videosRouter from './routes/videos';
 import feedRouter from './routes/feed';
 import originRouter from './routes/origin';
+import followRouter from './routes/follow';
+import subscriptionsRouter from './routes/subscriptions';
+import contentRouter from './routes/content';
+import { stripeWebhookHandler } from './services/stripeService';
 
 const app = express();
 
@@ -40,6 +44,13 @@ app.use(
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Stripe requires the raw body for webhook signature verification
+app.use(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  stripeWebhookHandler
+);
+
 // --- Static uploads ---
 const uploadsDir = path.resolve(config.storage.localDir);
 if (!fs.existsSync(uploadsDir)) {
@@ -53,6 +64,9 @@ app.use('/api/users', usersRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/feed', feedRouter);
 app.use('/api/origin', originRouter);
+app.use('/api/follow', followRouter);
+app.use('/api', subscriptionsRouter);   // mounts /creator/* and /subscribe/* and /upgrade/*
+app.use('/api/content', contentRouter);
 
 // --- Health check ---
 app.get('/healthz', (_req, res) => {
@@ -63,7 +77,7 @@ app.get('/healthz', (_req, res) => {
 app.use(errorHandler);
 
 // --- Start ---
-app.listen(config.port, () => {
+export const server = app.listen(config.port, () => {
   console.log(`[origin-social/server] listening on http://localhost:${config.port}`);
 });
 
