@@ -4,5 +4,3 @@
 .github\instructions\codacy.instructions.md
 .env
 
-# Ignore experimental module
-src/origin_protocol/experimental/
