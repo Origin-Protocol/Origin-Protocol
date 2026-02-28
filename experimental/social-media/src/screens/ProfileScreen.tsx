@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { usersApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 import { User, VideoMeta } from '../types';
@@ -16,6 +16,10 @@ export default function ProfileScreen({ userId }: Props) {
   const [videos, setVideos]   = useState<VideoMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio]   = useState('');
 
   const isOwn = !userId || userId === me?.id;
 
@@ -37,6 +41,30 @@ export default function ProfileScreen({ userId }: Props) {
 
     void fetchData();
   }, [targetId]);
+
+  function startEdit() {
+    if (!profile) return;
+    setEditName(profile.displayName);
+    setEditBio(profile.bio ?? '');
+    setEditing(true);
+  }
+
+  async function handleSave(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const { user } = await usersApi.updateMe({
+        displayName: editName.trim() || undefined,
+        bio:         editBio.trim() || undefined,
+      });
+      setProfile(user);
+      setEditing(false);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   if (!targetId) {
     return (
@@ -136,18 +164,73 @@ export default function ProfileScreen({ userId }: Props) {
             </span>
           )}
         </div>
+      </header>
 
-        {/* Logout (own profile only) */}
-        {isOwn && (
+      {/* Actions — own profile only */}
+      {isOwn && !editing && (
+        <div style={{ display: 'flex', gap: 'var(--sp-3)', marginBottom: 'var(--sp-5)' }}>
           <button
             className="btn btn--outline btn--sm"
+            onClick={startEdit}
+            style={{ flex: 1 }}
+          >
+            Edit profile
+          </button>
+          <button
+            className="btn btn--ghost btn--sm"
             onClick={logout}
-            style={{ flexShrink: 0 }}
+            style={{ flex: 1 }}
           >
             Log out
           </button>
-        )}
-      </header>
+        </div>
+      )}
+
+      {/* Inline edit form */}
+      {isOwn && editing && (
+        <div className="card" style={{ marginBottom: 'var(--sp-5)' }}>
+          <div className="card-body">
+            <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 'var(--sp-4)', color: 'var(--color-text)' }}>
+              Edit profile
+            </p>
+            <form onSubmit={(e) => void handleSave(e)}>
+              <div className="field">
+                <label className="field-label" htmlFor="prof-name">Display name</label>
+                <input
+                  id="prof-name"
+                  className="input"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Your Name"
+                />
+              </div>
+              <div className="field">
+                <label className="field-label" htmlFor="prof-bio">
+                  Bio
+                  <span className="optional"> (optional)</span>
+                </label>
+                <textarea
+                  id="prof-bio"
+                  className="textarea"
+                  value={editBio}
+                  onChange={(e) => setEditBio(e.target.value)}
+                  placeholder="Tell people about yourself…"
+                  rows={3}
+                />
+              </div>
+              {error && <div className="inline-error" style={{ marginBottom: 'var(--sp-3)' }}>⚠ {error}</div>}
+              <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
+                <button type="button" className="btn btn--outline btn--sm" onClick={() => setEditing(false)} style={{ flex: 1 }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn--primary btn--sm" disabled={saving} style={{ flex: 1 }}>
+                  {saving ? '…' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Bio */}
       {profile.bio && (
