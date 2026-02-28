@@ -106,7 +106,7 @@
     const dot = apiStatus.querySelector('.status-dot');
     const lbl = apiStatus.querySelector('.status-label');
     try {
-      await fetch('/v1/ledger/platform-policy?platform_id=', {
+      await fetch('/v1/ledger/platform-policy', {
         signal: AbortSignal.timeout(3000),
       });
       dot.className = 'status-dot online';
@@ -333,8 +333,7 @@
     const governance = data.governance || null;
 
     let html = '<div class="policy-grid">';
-    Object.entries(policy).forEach(function (_a) {
-      const k = _a[0]; const v = _a[1];
+    Object.entries(policy).forEach(function ([k, v]) {
       const display = typeof v === 'boolean'
         ? (v ? '<span class="badge badge--green">enabled</span>' : '<span class="badge badge--gray">disabled</span>')
         : '<span class="policy-val">' + escHtml(String(v)) + '</span>';
