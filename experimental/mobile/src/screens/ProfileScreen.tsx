@@ -11,13 +11,18 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usersApi } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
-import { User } from '../types';
+import { User, RootStackParamList } from '../types';
 import { colors, spacing, radius, fontSize, shadow } from '../styles/tokens';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function ProfileScreen() {
   const { user: me, logout } = useAuth();
+  const navigation = useNavigation<Nav>();
   const [profile, setProfile]   = useState<User | null>(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
@@ -189,15 +194,23 @@ export default function ProfileScreen() {
             </View>
           </View>
         ) : (
-          <View style={styles.actions}>
-            <TouchableOpacity style={[styles.btn, styles.btnOutline, { flex: 1 }]} onPress={startEdit}>
-              <Text style={styles.btnOutlineText}>Edit profile</Text>
-            </TouchableOpacity>
+          <View style={{ gap: spacing[3] }}>
+            <View style={styles.actions}>
+              <TouchableOpacity style={[styles.btn, styles.btnOutline, { flex: 1 }]} onPress={startEdit}>
+                <Text style={styles.btnOutlineText}>Edit profile</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.btn, styles.btnGhost, { flex: 1 }]}
+                onPress={() => void logout()}
+              >
+                <Text style={styles.btnGhostText}>Log out</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
-              style={[styles.btn, styles.btnGhost, { flex: 1 }]}
-              onPress={() => void logout()}
+              style={[styles.btn, styles.btnOutline, { width: '100%' }]}
+              onPress={() => navigation.navigate('Help')}
             >
-              <Text style={styles.btnGhostText}>Log out</Text>
+              <Text style={styles.btnOutlineText}>ⓘ  Help & Support</Text>
             </TouchableOpacity>
           </View>
         )}

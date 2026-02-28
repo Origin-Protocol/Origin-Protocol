@@ -8,10 +8,14 @@ import {
   ListRenderItemInfo,
   SafeAreaView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { feedApi, videosApi } from '../api/client';
-import { VideoMeta } from '../types';
+import { VideoMeta, RootStackParamList } from '../types';
 import VideoCard from '../components/VideoCard';
 import { colors, spacing, radius, fontSize } from '../styles/tokens';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 function SkeletonCard() {
   return (
@@ -49,6 +53,7 @@ const sk = StyleSheet.create({
 });
 
 export default function FeedScreen() {
+  const navigation = useNavigation<Nav>();
   const [videos, setVideos]   = useState<VideoMeta[]>([]);
   const [page, setPage]       = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -91,7 +96,13 @@ export default function FeedScreen() {
   }
 
   function renderItem({ item }: ListRenderItemInfo<VideoMeta>) {
-    return <VideoCard video={item} onLike={() => void handleLike(item)} />;
+    return (
+      <VideoCard
+        video={item}
+        onLike={() => void handleLike(item)}
+        onPress={() => navigation.navigate('VideoDetail', { videoId: item.id })}
+      />
+    );
   }
 
   return (

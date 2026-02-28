@@ -1,6 +1,7 @@
 import { VideoMeta, Comment } from '../types';
 import { videosApi } from '../api/client';
 import { useState, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Props {
   video: VideoMeta;
@@ -76,16 +77,21 @@ export default function VideoCard({ video }: Props) {
         {/* Title row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--sp-3)' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{
-              fontWeight:   700,
-              fontSize:     15,
-              color:        'var(--color-text)',
-              overflow:     'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace:   'nowrap',
-            }}>
-              {video.title}
-            </p>
+            <Link
+              to={`/video/${video.id}`}
+              style={{ textDecoration: 'none', display: 'block' }}
+            >
+              <p style={{
+                fontWeight:   700,
+                fontSize:     15,
+                color:        'var(--color-text)',
+                overflow:     'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace:   'nowrap',
+              }}>
+                {video.title}
+              </p>
+            </Link>
             {video.description && (
               <p style={{
                 fontSize:  13,

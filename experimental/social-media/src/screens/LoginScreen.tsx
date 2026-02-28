@@ -1,9 +1,13 @@
 import { useState, FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export default function LoginScreen() {
   const { login, register } = useAuth();
-  const [mode, setMode]             = useState<'login' | 'register'>('login');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<'login' | 'register'>(
+    searchParams.get('register') ? 'register' : 'login'
+  );
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
   const [username, setUsername]     = useState('');

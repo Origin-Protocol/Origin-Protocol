@@ -44,14 +44,16 @@ export interface PaginatedResponse<T> {
 
 // Navigation param-list types
 export type RootTabParamList = {
-  Feed: undefined;
-  Upload: undefined;
+  Feed:    undefined;
+  Upload:  undefined;
   Profile: undefined;
 };
 
 export type RootStackParamList = {
-  Main: undefined;
+  Landing:     undefined;
+  Main:        undefined;
   VideoDetail: { videoId: string };
-  Login: undefined;
-  Register: undefined;
+  Login:       undefined;
+  Register:    undefined;
+  Help:        undefined;
 };

@@ -10,6 +10,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: '/',        icon: '⊞',  label: 'Feed'    },
   { to: '/upload',  icon: '⊕',  label: 'Upload'  },
+  { to: '/help',    icon: 'ⓘ',  label: 'Help'    },
   { to: '/profile', icon: '◎',  label: 'Profile' },
 ];
 
@@ -33,7 +34,9 @@ export default function NavBar() {
     }}>
       {NAV_ITEMS.map(({ to, icon, label }) => {
         const href = to === '/profile' ? (user ? '/profile' : '/login') : to;
-        const isActive = pathname === href || (to === '/profile' && pathname.startsWith('/profile'));
+        const isActive = pathname === href
+          || (to === '/profile' && pathname.startsWith('/profile'))
+          || (to === '/help'    && pathname.startsWith('/help'));
 
         return (
           <Link

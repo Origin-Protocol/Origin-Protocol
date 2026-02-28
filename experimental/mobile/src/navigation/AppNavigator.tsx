@@ -12,6 +12,9 @@ import FeedScreen from '../screens/FeedScreen';
 import UploadScreen from '../screens/UploadScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
+import LandingScreen from '../screens/LandingScreen';
+import HelpScreen from '../screens/HelpScreen';
+import VideoDetailScreen from '../screens/VideoDetailScreen';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -63,9 +66,14 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <>
+            <Stack.Screen name="Main"        component={MainTabs} />
+            <Stack.Screen name="VideoDetail" component={VideoDetailScreen} />
+            <Stack.Screen name="Help"        component={HelpScreen} />
+          </>
         ) : (
           <>
+            <Stack.Screen name="Landing"  component={LandingScreen} />
             <Stack.Screen name="Login"    component={LoginScreen} />
             <Stack.Screen name="Register" component={LoginScreen} />
           </>

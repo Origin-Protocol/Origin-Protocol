@@ -10,11 +10,12 @@ import { VideoMeta } from '../types';
 import { colors, spacing, radius, fontSize, shadow } from '../styles/tokens';
 
 interface Props {
-  video: VideoMeta;
+  video:   VideoMeta;
   onLike?: () => void;
+  onPress?: () => void;
 }
 
-export default function VideoCard({ video, onLike }: Props) {
+export default function VideoCard({ video, onLike, onPress }: Props) {
   const [liked, setLiked] = useState(false);
 
   function handleLike() {
@@ -23,7 +24,12 @@ export default function VideoCard({ video, onLike }: Props) {
   }
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      disabled={!onPress}
+      activeOpacity={onPress ? 0.8 : 1}
+    >
       {/* Thumbnail / player placeholder */}
       <View style={styles.thumb}>
         {video.thumbnailUrl ? (
@@ -77,7 +83,7 @@ export default function VideoCard({ video, onLike }: Props) {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
