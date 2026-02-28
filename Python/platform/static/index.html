@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origin Protocol – Creator Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Origin</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" data-screen="overview">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Overview</span>
+      </li>
+      <li class="nav-item" data-screen="verify">
+        <span class="nav-icon">✓</span>
+        <span class="nav-label">Verify Content</span>
+      </li>
+      <li class="nav-item" data-screen="keys">
+        <span class="nav-icon">⚿</span>
+        <span class="nav-label">Key Status</span>
+      </li>
+      <li class="nav-item" data-screen="revocation">
+        <span class="nav-icon">⊘</span>
+        <span class="nav-label">Revocation Check</span>
+      </li>
+      <li class="nav-item" data-screen="policy">
+        <span class="nav-icon">≡</span>
+        <span class="nav-label">Platform Policy</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <span class="version-badge">v1.0</span>
+    </div>
+  </nav>
+
+  <!-- Mobile overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main layout -->
+  <div class="layout">
+    <!-- Top bar -->
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
+      <div class="topbar-title" id="topbarTitle">Overview</div>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+          <span class="theme-icon">☀</span>
+        </button>
+        <div class="api-status" id="apiStatus">
+          <span class="status-dot"></span>
+          <span class="status-label">API</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Screens -->
+    <main class="main" id="main">
+
+      <!-- ── Overview ── -->
+      <section class="screen" id="screen-overview">
+        <div class="page-header">
+          <h1 class="page-title">Creator Dashboard</h1>
+          <p class="page-subtitle">Manage and verify your content authenticity on the Origin Protocol network.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--blue">✓</div>
+            <div class="stat-body">
+              <div class="stat-value" id="stat-verified">—</div>
+              <div class="stat-label">Verifications Today</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--green">⚿</div>
+            <div class="stat-body">
+              <div class="stat-value" id="stat-keys">—</div>
+              <div class="stat-label">Active Keys</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--purple">≡</div>
+            <div class="stat-body">
+              <div class="stat-value" id="stat-platforms">—</div>
+              <div class="stat-label">Policy Profile</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon--orange">⬡</div>
+            <div class="stat-body">
+              <div class="stat-value" id="stat-nodes">—</div>
+              <div class="stat-label">Network Nodes</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-grid">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Quick Verify</h2>
+              <span class="badge badge--blue">Fast Check</span>
+            </div>
+            <p class="card-text">Quickly verify a piece of content by providing the creator ID and asset ID.</p>
+            <button class="btn btn--primary" onclick="app.navigate('verify')">Go to Verify →</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Policy Overview</h2>
+              <span class="badge badge--green">Live</span>
+            </div>
+            <p class="card-text">View the current platform policy and governance settings for your platform.</p>
+            <button class="btn btn--secondary" onclick="app.navigate('policy')">View Policy →</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">API Reference</h2>
+              <span class="badge badge--purple">Docs</span>
+            </div>
+            <p class="card-text">Explore the full API documentation with interactive endpoint testing.</p>
+            <a class="btn btn--outline" href="/docs" target="_blank">Open Docs ↗</a>
+          </div>
+        </div>
+
+        <div class="card card--full">
+          <div class="card-header">
+            <h2 class="card-title">Platform Policy Summary</h2>
+            <button class="btn btn--sm btn--secondary" onclick="app.loadPolicySummary()">Refresh</button>
+          </div>
+          <div id="policy-summary-content">
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <span>Loading policy…</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Verify Content ── -->
+      <section class="screen hidden" id="screen-verify">
+        <div class="page-header">
+          <h1 class="page-title">Verify Content</h1>
+          <p class="page-subtitle">Check the authenticity and ownership status of a content bundle.</p>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Verification Request</h2>
+            </div>
+            <form id="verifyForm" class="form" novalidate>
+              <div class="field">
+                <label class="label" for="v-creator-id">Creator ID <span class="required">*</span></label>
+                <input class="input" id="v-creator-id" name="creator_id" type="text"
+                  placeholder="e.g. creator-abc123" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="v-key-id">Key ID <span class="required">*</span></label>
+                <input class="input" id="v-key-id" name="key_id" type="text"
+                  placeholder="e.g. a3f2…" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="v-asset-id">Asset ID <span class="required">*</span></label>
+                <input class="input" id="v-asset-id" name="asset_id" type="text"
+                  placeholder="e.g. asset-xyz789" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="v-content-hash">Content Hash <span class="required">*</span></label>
+                <input class="input" id="v-content-hash" name="content_hash" type="text"
+                  placeholder="SHA-256 hex digest" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="v-platform-id">Platform ID <span class="required">*</span></label>
+                <input class="input" id="v-platform-id" name="platform_id" type="text"
+                  placeholder="e.g. youtube" autocomplete="off" required />
+              </div>
+              <div class="field-row">
+                <button class="btn btn--primary btn--full" type="submit" id="verifySubmit">
+                  Verify Content
+                </button>
+                <button class="btn btn--outline" type="button" id="verifyReset">Clear</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Result</h2>
+            </div>
+            <div id="verifyResult" class="result-placeholder">
+              <div class="empty-state">
+                <span class="empty-icon">✓</span>
+                <p>Submit the form to see the verification result.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Key Status ── -->
+      <section class="screen hidden" id="screen-keys">
+        <div class="page-header">
+          <h1 class="page-title">Key Status</h1>
+          <p class="page-subtitle">Check whether a signing key is active in the registry.</p>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Lookup</h2>
+            </div>
+            <form id="keyForm" class="form" novalidate>
+              <div class="field">
+                <label class="label" for="k-creator-id">Creator ID <span class="required">*</span></label>
+                <input class="input" id="k-creator-id" name="creator_id" type="text"
+                  placeholder="e.g. creator-abc123" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="k-key-id">Key ID <span class="required">*</span></label>
+                <input class="input" id="k-key-id" name="key_id" type="text"
+                  placeholder="e.g. a3f2…" autocomplete="off" required />
+              </div>
+              <div class="field-row">
+                <button class="btn btn--primary btn--full" type="submit">Check Key</button>
+                <button class="btn btn--outline" type="button" id="keyReset">Clear</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Status</h2>
+            </div>
+            <div id="keyResult" class="result-placeholder">
+              <div class="empty-state">
+                <span class="empty-icon">⚿</span>
+                <p>Enter a creator ID and key ID to check the key status.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Revocation Check ── -->
+      <section class="screen hidden" id="screen-revocation">
+        <div class="page-header">
+          <h1 class="page-title">Revocation Check</h1>
+          <p class="page-subtitle">Verify that a content asset has not been revoked.</p>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Revocation Lookup</h2>
+            </div>
+            <form id="revocationForm" class="form" novalidate>
+              <div class="field">
+                <label class="label" for="r-creator-id">Creator ID <span class="required">*</span></label>
+                <input class="input" id="r-creator-id" name="creator_id" type="text"
+                  placeholder="e.g. creator-abc123" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="r-key-id">Key ID <span class="required">*</span></label>
+                <input class="input" id="r-key-id" name="key_id" type="text"
+                  placeholder="e.g. a3f2…" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="r-asset-id">Asset ID <span class="required">*</span></label>
+                <input class="input" id="r-asset-id" name="asset_id" type="text"
+                  placeholder="e.g. asset-xyz789" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="r-content-hash">Content Hash <span class="required">*</span></label>
+                <input class="input" id="r-content-hash" name="content_hash" type="text"
+                  placeholder="SHA-256 hex digest" autocomplete="off" required />
+              </div>
+              <div class="field">
+                <label class="label" for="r-platform-id">Platform ID <span class="required">*</span></label>
+                <input class="input" id="r-platform-id" name="platform_id" type="text"
+                  placeholder="e.g. youtube" autocomplete="off" required />
+              </div>
+              <div class="field-row">
+                <button class="btn btn--primary btn--full" type="submit">Check Revocation</button>
+                <button class="btn btn--outline" type="button" id="revocationReset">Clear</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Result</h2>
+            </div>
+            <div id="revocationResult" class="result-placeholder">
+              <div class="empty-state">
+                <span class="empty-icon">⊘</span>
+                <p>Enter asset details to check revocation status.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Platform Policy ── -->
+      <section class="screen hidden" id="screen-policy">
+        <div class="page-header">
+          <h1 class="page-title">Platform Policy</h1>
+          <p class="page-subtitle">View the active verification policy and governance configuration.</p>
+        </div>
+
+        <div class="card card--full">
+          <div class="card-header">
+            <h2 class="card-title">Policy Lookup</h2>
+          </div>
+          <div class="form form--inline">
+            <div class="field field--grow">
+              <label class="label" for="p-platform-id">Platform ID <span class="optional">(optional)</span></label>
+              <input class="input" id="p-platform-id" type="text" placeholder="Leave blank for default policy" />
+            </div>
+            <button class="btn btn--primary" id="policyLoad">Load Policy</button>
+          </div>
+        </div>
+
+        <div id="policyResult"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

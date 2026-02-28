@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from origin_protocol.manifest import Manifest, ORIGIN_VERSION
@@ -88,6 +90,16 @@ class AssetRecord:
 
 
 app = FastAPI(title="Origin Platform Ledger API", version="1.0.0")
+
+# Serve the creator dashboard from /dashboard/
+_static_dir = Path(__file__).resolve().parent / "static"
+if _static_dir.is_dir():
+    app.mount("/dashboard", StaticFiles(directory=str(_static_dir), html=True), name="dashboard")
+
+
+@app.get("/", include_in_schema=False)
+def root_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/dashboard/")
 
 
 def _now_iso() -> str:
