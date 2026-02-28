@@ -1,0 +1,8 @@
+{
+  "profile": "permissive",
+  "require_key_registry": false,
+  "require_revocation_check": false,
+  "require_platform_match": false,
+  "require_key_id_match": false,
+  "require_asset_record": false
+}

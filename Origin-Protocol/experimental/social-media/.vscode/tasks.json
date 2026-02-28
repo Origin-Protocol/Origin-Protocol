@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "bundle-frontend-zip",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"npm run build; if (Test-Path 'deploy') { Remove-Item -Recurse -Force 'deploy' }; New-Item -ItemType Directory -Path 'deploy' | Out-Null; Copy-Item -Recurse -Force 'dist\\*' 'deploy\\'; Compress-Archive -Path 'deploy\\*' -DestinationPath 'deploy\\origin-social-frontend-upload.zip' -Force; Write-Output 'ZIP_READY=deploy/origin-social-frontend-upload.zip'"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "refresh-pages-zips",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"npm run build:pages; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; if (-not (Test-Path 'deploy')) { New-Item -ItemType Directory -Path 'deploy' | Out-Null }; Get-ChildItem 'deploy' -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force; Copy-Item 'dist/*' 'deploy' -Recurse; if (Test-Path '_headers') { Copy-Item '_headers' 'deploy/_headers' -Force }; if (Test-Path '_redirects') { Copy-Item '_redirects' 'deploy/_redirects' -Force }; if (Test-Path 'deploy/origin-social-frontend-upload.zip') { Remove-Item 'deploy/origin-social-frontend-upload.zip' -Force }; Compress-Archive -Path 'deploy/*' -DestinationPath 'deploy/origin-social-frontend-upload.zip' -CompressionLevel Optimal -Force; Write-Output 'ZIP_READY=deploy/origin-social-frontend-upload.zip'"
+			]
+		}
+	]
+}

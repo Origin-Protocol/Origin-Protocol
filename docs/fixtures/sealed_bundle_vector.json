@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "path": "bundle.json",
+      "sha256": "38305938ac0a04d885d0e3c0376f4f924bc0cb84b5f4940c9333f7ffffd67da3"
+    },
+    {
+      "path": "bundle.sig",
+      "sha256": "9bcffe3453f9d67f0193f2cb82d94b5ecd07b5d3fa9803c4f9b545fb045cdd9c"
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "6829c646b0e06fb4fea5783a698bb1a93f7d7af6b6e53d04c7484b7fd19fe4a2"
+    },
+    {
+      "path": "media/vector.mp4",
+      "sha256": "d281cea25cbc11507e1ab187ca1d7e54d6be1a4f34772fa7e74ca08137f0f3ed"
+    },
+    {
+      "path": "public_key.ed25519",
+      "sha256": "f0ff50dacf109dea7f716d7c03eb7a821aa3a283fd3fa02f4c14dbba7d3c3322"
+    },
+    {
+      "path": "seal.ed25519",
+      "sha256": "e59cd0539b2488e713b0238ddc35f95d2680f22e4d797e0fe74fdf4523629118"
+    },
+    {
+      "path": "seal.json",
+      "sha256": "036d87655f2822d570aae88417f23d8883bc4da96ccfe2a1cd38fd76448e3bc4"
+    },
+    {
+      "path": "signature.ed25519",
+      "sha256": "5879f69bdc14542324117eff3055d33e48cf51b8a640345a302b79aa1ebcd513"
+    }
+  ],
+  "key_id": "56475aa75463474c0285df5dbf2bcab73da651358839e9b77481b2eab107708c",
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAA6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=\n-----END PUBLIC KEY-----\n",
+  "sealed_bundle_path": "docs/fixtures/sealed_bundle_vector.zip",
+  "sha256": "6b7f93aa0a432481305ad1754d2b7c366739a68bbb3f31d90d39e70f0f7f9972"
+}

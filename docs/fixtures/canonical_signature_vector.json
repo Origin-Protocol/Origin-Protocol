@@ -1,0 +1,23 @@
+{
+  "canonical_json": "{\"asset_id\":\"asset-123\",\"content_hash\":\"c6f7611b0406f2a66b33f5bb05c8acfa2bd3dc7cd7aef12d0f2d087c6efc8a56\",\"created_at\":\"2026-01-15T00:00:00+00:00\",\"creator_id\":\"creator-123\",\"intended_platforms\":[\"yt\",\"tt\"],\"key_id\":\"56475aa75463474c0285df5dbf2bcab73da651358839e9b77481b2eab107708c\",\"manifest_id\":\"00000000-0000-0000-0000-000000000001\",\"origin_id\":\"0b31cf03-b424-5f64-9d64-cefcabf5cf88\",\"origin_schema\":\"1.0\",\"origin_version\":\"0.1\",\"signature_algorithm\":\"ed25519\"}",
+  "key_id": "56475aa75463474c0285df5dbf2bcab73da651358839e9b77481b2eab107708c",
+  "manifest": {
+    "asset_id": "asset-123",
+    "content_hash": "c6f7611b0406f2a66b33f5bb05c8acfa2bd3dc7cd7aef12d0f2d087c6efc8a56",
+    "created_at": "2026-01-15T00:00:00+00:00",
+    "creator_id": "creator-123",
+    "intended_platforms": [
+      "yt",
+      "tt"
+    ],
+    "key_id": "56475aa75463474c0285df5dbf2bcab73da651358839e9b77481b2eab107708c",
+    "manifest_id": "00000000-0000-0000-0000-000000000001",
+    "origin_id": "0b31cf03-b424-5f64-9d64-cefcabf5cf88",
+    "origin_schema": "1.0",
+    "origin_version": "0.1",
+    "signature_algorithm": "ed25519"
+  },
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAA6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg=\n-----END PUBLIC KEY-----\n",
+  "sha256": "0094a69702c22641e1b788f99b034b7409f03ca24e5136888ce6587cb4e5a120",
+  "signature_base64": "f8Xke6xtv6fs5gLmtDsrjL59C293Abt6+kYzGhZma8JWFJJ8I9mImTtcl+Gsej455b064+7tTwRIz7TWgTioDQ=="
+}

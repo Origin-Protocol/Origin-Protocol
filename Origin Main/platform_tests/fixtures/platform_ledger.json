@@ -1,0 +1,35 @@
+{
+  "updated_at": "2026-01-24T00:00:00+00:00",
+  "records": [
+    {
+      "creator_id": "creator-1",
+      "key_id": "key-1",
+      "asset_id": "asset-valid",
+      "content_hash": "hash-valid",
+      "intended_platforms": ["tiktok", "youtube"],
+      "status": "active",
+      "updated_at": "2026-01-24T00:00:00+00:00",
+      "origin_version": "0.1"
+    },
+    {
+      "creator_id": "creator-1",
+      "key_id": "key-1",
+      "asset_id": "asset-revoked",
+      "content_hash": "hash-revoked",
+      "intended_platforms": ["tiktok"],
+      "status": "active",
+      "updated_at": "2026-01-24T00:00:00+00:00",
+      "origin_version": "0.1"
+    },
+    {
+      "creator_id": "creator-2",
+      "key_id": "key-2",
+      "asset_id": "asset-key-revoked",
+      "content_hash": "hash-key-revoked",
+      "intended_platforms": ["instagram"],
+      "status": "revoked",
+      "updated_at": "2026-01-24T00:00:00+00:00",
+      "origin_version": "0.1"
+    }
+  ]
+}

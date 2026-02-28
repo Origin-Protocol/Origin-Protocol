@@ -1,0 +1,20 @@
+{
+  "startedAt": "2026-02-27T18:12:58.1525583-05:00",
+  "backendManaged": true,
+  "backend": 57100,
+  "fullNode": 56304,
+  "registry": 42816,
+  "sharedLedgerPath": "C:\\Users\\Ommi\\AppData\\Local\\Temp/origin_shared_ledger.json",
+  "logs": {
+    "fullNodeOut": "C:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin Main\\tools\\logs\\fullnode-20260227-181254.out.log",
+    "fullNodeErr": "C:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin Main\\tools\\logs\\fullnode-20260227-181254.err.log",
+    "registryOut": "C:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin Main\\tools\\logs\\registry-20260227-181254.out.log",
+    "registryErr": "C:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin Main\\tools\\logs\\registry-20260227-181254.err.log"
+  },
+  "urls": {
+    "backendHealth": "http://127.0.0.1:4000/healthz",
+    "fullNodeHealth": "http://127.0.0.1:9021/health",
+    "registryHealth": "http://127.0.0.1:9031/health",
+    "registryNodes": "http://127.0.0.1:9031/nodes"
+  }
+}

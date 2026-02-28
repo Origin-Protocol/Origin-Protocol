@@ -1,0 +1,72 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Rebuild and package frontend zips",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"c:/Users/Ommi/Desktop/ORIGIN Protocol/.vscode/package-frontend-single.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Rebuild and package frontend zips v2",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"c:/Users/Ommi/Desktop/ORIGIN Protocol/.vscode/package-frontend-single.ps1"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Check pwsh task",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Set-Location \"c:/Users/Ommi/Desktop/ORIGIN Protocol/Origin-Protocol.worktrees/copilot-worktree-2026-02-24T12-31-44/experimental/social-media\"; Get-Location"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Deploy originapp to Fly",
+			"type": "shell",
+			"command": "& \"$env:USERPROFILE\\.fly\\bin\\fly.exe\" deploy -a originapp -c \"c:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin-Protocol.worktrees\\copilot-worktree-2026-02-24T12-31-44\\experimental\\server\\fly.toml\"",
+			"isBackground": false
+		},
+		{
+			"label": "Check Fly status",
+			"type": "shell",
+			"command": "& \"$env:USERPROFILE\\.fly\\bin\\fly.exe\" status -a originapp",
+			"isBackground": false
+		},
+		{
+			"label": "Deploy Fly via config path",
+			"type": "shell",
+			"command": "& \"$env:USERPROFILE\\.fly\\bin\\fly.exe\" deploy -a originapp -c \"c:\\Users\\Ommi\\Desktop\\ORIGIN Protocol\\Origin-Protocol.worktrees\\copilot-worktree-2026-02-24T12-31-44\\experimental\\server\\fly.toml\"",
+			"isBackground": false
+		},
+		{
+			"label": "Locate Fly CLI",
+			"type": "shell",
+			"command": "where.exe fly; where.exe flyctl; where.exe flyctl.exe; Test-Path \"$env:USERPROFILE\\.fly\\bin\\fly.exe\"",
+			"isBackground": false
+		},
+		{
+			"label": "Check common flyctl paths",
+			"type": "shell",
+			"command": "$paths = @(\"$env:USERPROFILE\\.fly\\bin\\flyctl.exe\", \"$env:LOCALAPPDATA\\fly\\bin\\flyctl.exe\", \"$env:USERPROFILE\\AppData\\Local\\fly\\bin\\flyctl.exe\"); foreach ($p in $paths) { if (Test-Path $p) { Write-Output $p } }",
+			"isBackground": false
+		}
+	]
+}

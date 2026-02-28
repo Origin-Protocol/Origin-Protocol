@@ -1,0 +1,8 @@
+{
+  "profile": "standard",
+  "require_key_registry": true,
+  "require_revocation_check": true,
+  "require_platform_match": true,
+  "require_key_id_match": true,
+  "require_asset_record": true
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"adapterTypes.d.ts","sourceRoot":"","sources":["../../../../src/services/studio/adapters/adapterTypes.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,mBAAmB,EAAE,iBAAiB,EAAE,MAAM,uBAAuB,CAAC;AAInG,MAAM,WAAW,kBAAkB;IACjC,QAAQ,CAAC,KAAK,EAAE,iBAAiB,CAAC;IAClC,GAAG,CAAC,KAAK,EAAE,kBAAkB,GAAG,OAAO,CAAC,mBAAmB,CAAC,CAAC;CAC9D"}
